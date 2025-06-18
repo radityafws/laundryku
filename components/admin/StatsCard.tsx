@@ -73,33 +73,31 @@ export default function StatsCard({
   }
 
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-      <div className="flex items-center space-x-4">
-        <div className={`w-14 h-14 ${colors.bg} rounded-xl flex items-center justify-center text-2xl`}>
+    <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group">
+      <div className="flex items-start justify-between mb-4">
+        <div className={`w-14 h-14 ${colors.bg} rounded-xl flex items-center justify-center text-2xl group-hover:scale-110 transition-transform duration-300`}>
           {icon}
         </div>
         
-        <div className="flex-1">
-          <h3 className="text-sm font-medium text-gray-600 mb-1">{title}</h3>
-          <p className="text-2xl font-bold text-gray-900 mb-1">{value}</p>
-          
-          <div className="flex items-center space-x-2">
-            {subtitle && (
-              <p className="text-sm text-gray-500">{subtitle}</p>
-            )}
-            
-            {trend && (
-              <div className={`flex items-center space-x-1 text-xs font-medium px-2 py-1 rounded-full ${
-                trend.isPositive 
-                  ? 'bg-green-100 text-green-700' 
-                  : 'bg-red-100 text-red-700'
-              }`}>
-                <span>{trend.isPositive ? '↗️' : '↘️'}</span>
-                <span>{Math.abs(trend.value)}%</span>
-              </div>
-            )}
+        {trend && (
+          <div className={`flex items-center space-x-1 text-xs font-medium px-2 py-1 rounded-full ${
+            trend.isPositive 
+              ? 'bg-green-100 text-green-700' 
+              : 'bg-red-100 text-red-700'
+          }`}>
+            <span>{trend.isPositive ? '↗️' : '↘️'}</span>
+            <span>{Math.abs(trend.value)}%</span>
           </div>
-        </div>
+        )}
+      </div>
+      
+      <div className="space-y-2">
+        <h3 className="text-sm font-medium text-gray-600 leading-tight">{title}</h3>
+        <p className="text-2xl font-bold text-gray-900">{value}</p>
+        
+        {subtitle && (
+          <p className="text-sm text-gray-500">{subtitle}</p>
+        )}
       </div>
     </div>
   );
