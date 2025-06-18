@@ -28,7 +28,7 @@ export default function ExpensesPage() {
     };
   });
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 15;
+  const itemsPerPage = 10;
 
   // Debounce search term
   const debouncedSearchTerm = useDebounce(searchTerm, 400);
