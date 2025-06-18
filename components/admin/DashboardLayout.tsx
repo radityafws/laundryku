@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCurrentUser, useLogout } from '@/hooks/useAuth';
 import { isAuthenticated } from '@/lib/auth';
