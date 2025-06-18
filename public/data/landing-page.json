@@ -1,0 +1,251 @@
+{
+  "business": {
+    "name": "LaundryKilat",
+    "tagline": "Bersih, Cepat, Terjangkau",
+    "description": "Layanan laundry kiloan terpercaya dengan kualitas terbaik dan harga terjangkau.",
+    "logo": "🧺"
+  },
+  "hero": {
+    "badge": {
+      "icon": "🧺",
+      "text": "Bersih, Cepat, Terjangkau"
+    },
+    "title": {
+      "main": "Layanan Laundry",
+      "highlight": " Kiloan & Express",
+      "subtitle": "Terbaik di UNS!"
+    },
+    "features": [
+      {
+        "icon": "📦",
+        "text": "Express 1 hari"
+      },
+      {
+        "icon": "💰",
+        "text": "Harga mulai Rp 3.000/kg"
+      }
+    ],
+    "cta": [
+      {
+        "text": "Cek Status",
+        "icon": "💬",
+        "type": "primary",
+        "link": "/cek-status"
+      },
+      {
+        "text": "Hitung Estimasi",
+        "icon": "📊",
+        "type": "secondary",
+        "link": "/estimasi"
+      }
+    ],
+    "animation": {
+      "washingMachine": {
+        "colors": ["red", "blue", "green", "yellow"],
+        "floatingElements": [
+          { "icon": "🧽", "position": "top-left" },
+          { "icon": "🧴", "position": "top-right" },
+          { "icon": "👕", "position": "bottom-left" },
+          { "icon": "✨", "position": "bottom-right" }
+        ]
+      }
+    }
+  },
+  "about": {
+    "title": {
+      "main": "Tentang",
+      "highlight": "LaundryKilat"
+    },
+    "description": "LaundryKilat adalah layanan laundry kiloan terpercaya yang telah melayani lebih dari 5.000 pelanggan sejak 2019. Kami berkomitmen memberikan layanan cepat, bersih, dan terjangkau bagi setiap pelanggan kami.",
+    "location": {
+      "icon": "📍",
+      "title": "Berlokasi di Solo",
+      "description": "Dengan peralatan modern dan tenaga profesional, kami pastikan pakaian Anda ditangani dengan hati-hati dan higienis."
+    },
+    "stats": [
+      {
+        "icon": "👥",
+        "value": "5,000+",
+        "label": "Pelanggan Puas",
+        "color": "blue"
+      },
+      {
+        "icon": "📅",
+        "value": "2019",
+        "label": "Sejak Tahun",
+        "color": "green"
+      },
+      {
+        "icon": "⚡",
+        "value": "24",
+        "label": "Jam Express",
+        "color": "purple"
+      },
+      {
+        "icon": "💰",
+        "value": "3K",
+        "label": "Mulai /kg",
+        "color": "orange"
+      }
+    ]
+  },
+  "features": {
+    "title": {
+      "main": "Mengapa Pilih",
+      "highlight": "LaundryKilat?"
+    },
+    "subtitle": "Kami memberikan pelayanan terbaik dengan standar kualitas tinggi untuk kepuasan Anda",
+    "items": [
+      {
+        "icon": "⏱️",
+        "title": "Layanan Express",
+        "description": "Butuh cepat? Kami sediakan layanan 1 hari selesai dengan harga terjangkau.",
+        "gradient": "from-blue-500 to-blue-600"
+      },
+      {
+        "icon": "💸",
+        "title": "Harga Hemat",
+        "description": "Mulai dari Rp 3.000/kg untuk layanan standar (3 hari), cocok untuk harian maupun bulanan.",
+        "gradient": "from-green-500 to-green-600"
+      },
+      {
+        "icon": "📦",
+        "title": "Packing Rapi",
+        "description": "Pakaian Anda dikemas bersih dan wangi. Siap langsung dipakai atau disimpan.",
+        "gradient": "from-purple-500 to-purple-600"
+      },
+      {
+        "icon": "🔒",
+        "title": "Aman dan Terpercaya",
+        "description": "Setiap order memiliki nomor invoice dan bisa dilacak statusnya langsung di website ini.",
+        "gradient": "from-orange-500 to-orange-600"
+      }
+    ],
+    "additionalInfo": [
+      {
+        "icon": "🚚",
+        "title": "Antar Jemput Gratis",
+        "subtitle": "Minimal order 5kg"
+      },
+      {
+        "icon": "🧼",
+        "title": "Deterjen Premium",
+        "subtitle": "Aman untuk kulit sensitif"
+      },
+      {
+        "icon": "📱",
+        "title": "Notifikasi Real-time",
+        "subtitle": "Update status via WhatsApp"
+      }
+    ]
+  },
+  "contact": {
+    "title": {
+      "main": "Hubungi",
+      "highlight": "LaundryKilat"
+    },
+    "subtitle": "Siap melayani kebutuhan laundry Anda dengan pelayanan terbaik",
+    "info": [
+      {
+        "icon": "📍",
+        "title": "Alamat",
+        "content": "Jl. Surya III No.24, Jebres, Kec. Jebres, Kota Surakarta, Jawa Tengah 57126",
+        "gradient": "from-red-500 to-red-600"
+      },
+      {
+        "icon": "⏰",
+        "title": "Jam Operasional",
+        "content": "Senin – Minggu  10.00–22.00",
+        "gradient": "from-blue-500 to-blue-600"
+      },
+      {
+        "icon": "📱",
+        "title": "WhatsApp",
+        "content": "0812-3456-7890",
+        "gradient": "from-green-500 to-green-600",
+        "link": "https://wa.me/081234567890"
+      },
+      {
+        "icon": "📧",
+        "title": "Email",
+        "content": "support@laundrykilat.id",
+        "gradient": "from-purple-500 to-purple-600",
+        "link": "mailto:support@laundrykilat.id"
+      },
+      {
+        "icon": "🌐",
+        "title": "Instagram",
+        "content": "@laundrykilat.solo",
+        "gradient": "from-pink-500 to-pink-600",
+        "link": "https://instagram.com/laundrykilat.solo"
+      }
+    ],
+    "cta": {
+      "title": "Siap untuk Mencoba Layanan Kami?",
+      "subtitle": "Hubungi kami sekarang untuk konsultasi gratis dan dapatkan penawaran terbaik!",
+      "buttons": [
+        {
+          "text": "Chat WhatsApp",
+          "icon": "📱",
+          "type": "primary",
+          "color": "green",
+          "link": "https://wa.me/081234567890"
+        },
+        {
+          "text": "Telepon Sekarang",
+          "icon": "📞",
+          "type": "secondary",
+          "color": "blue",
+          "link": "tel:0812-3456-7890"
+        }
+      ]
+    }
+  },
+  "footer": {
+    "brand": {
+      "name": "LaundryKilat",
+      "logo": "🧺",
+      "description": "Layanan laundry kiloan terpercaya dengan kualitas terbaik dan harga terjangkau."
+    },
+    "sections": [
+      {
+        "title": "Layanan",
+        "items": [
+          "Laundry Kiloan",
+          "Express 1 Hari",
+          "Cuci Kering",
+          "Setrika Saja"
+        ]
+      },
+      {
+        "title": "Menu",
+        "items": [
+          { "text": "Home", "link": "#home" },
+          { "text": "Tentang", "link": "#about" },
+          { "text": "Layanan", "link": "#features" },
+          { "text": "Kontak", "link": "#contact" }
+        ]
+      },
+      {
+        "title": "Kontak",
+        "items": [
+          "📱 0812-3456-7890",
+          "📧 support@laundrykilat.id",
+          "🌐 @laundrykilat.solo"
+        ]
+      }
+    ],
+    "copyright": "All rights reserved. Made with ❤️ for better laundry experience."
+  },
+  "navigation": {
+    "logo": {
+      "icon": "🧺",
+      "text": "LaundryKilat"
+    },
+    "menu": [
+      { "text": "Home", "link": "/" },
+      { "text": "Cek Status", "link": "/cek-status" },
+      { "text": "Hitung Estimasi", "link": "/estimasi" }
+    ]
+  }
+}
