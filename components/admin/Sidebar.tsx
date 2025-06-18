@@ -26,13 +26,19 @@ const menuItems = [
     badge: '12'
   },
   {
+    icon: '👥',
+    label: 'Manajemen Pelanggan',
+    href: '/admin/customers',
+    description: 'Customer Management'
+  },
+  {
     icon: '💸',
     label: 'Manajemen Pengeluaran',
     href: '/admin/expenses',
     description: 'Track Expenses'
   },
   {
-    icon: '👥',
+    icon: '👨‍💼',
     label: 'Manajemen Pegawai',
     href: '/admin/employees',
     description: 'Staff Management'

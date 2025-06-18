@@ -118,44 +118,7 @@ export default function OrdersPage() {
           </div>
         </div>
 
-        {/* Summary Statistics */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
-          <StatsCard
-            icon="📦"
-            title="Total Pesanan"
-            value={totalOrders}
-            subtitle="dalam filter"
-            color="blue"
-            isLoading={isLoading}
-          />
-          
-          <StatsCard
-            icon="🔄"
-            title="Dalam Proses"
-            value={inProgressOrders}
-            subtitle="sedang dikerjakan"
-            color="yellow"
-            isLoading={isLoading}
-          />
-          
-          <StatsCard
-            icon="✅"
-            title="Siap Diambil"
-            value={readyOrders}
-            subtitle="menunggu pickup"
-            color="green"
-            isLoading={isLoading}
-          />
-          
-          <StatsCard
-            icon="✔️"
-            title="Sudah Diambil"
-            value={completedOrders}
-            subtitle="selesai"
-            color="purple"
-            isLoading={isLoading}
-          />
-        </div>
+
 
         {/* Header & Actions */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-4 sm:p-6">
@@ -248,6 +211,45 @@ export default function OrdersPage() {
               </div>
             )}
           </div>
+        </div>
+
+                {/* Summary Statistics */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
+          <StatsCard
+            icon="📦"
+            title="Total Pesanan"
+            value={totalOrders}
+            subtitle="dalam filter"
+            color="blue"
+            isLoading={isLoading}
+          />
+          
+          <StatsCard
+            icon="🔄"
+            title="Dalam Proses"
+            value={inProgressOrders}
+            subtitle="sedang dikerjakan"
+            color="yellow"
+            isLoading={isLoading}
+          />
+          
+          <StatsCard
+            icon="✅"
+            title="Siap Diambil"
+            value={readyOrders}
+            subtitle="menunggu pickup"
+            color="green"
+            isLoading={isLoading}
+          />
+          
+          <StatsCard
+            icon="✔️"
+            title="Sudah Diambil"
+            value={completedOrders}
+            subtitle="selesai"
+            color="purple"
+            isLoading={isLoading}
+          />
         </div>
 
         {/* Orders Table */}
