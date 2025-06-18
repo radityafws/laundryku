@@ -164,7 +164,9 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse
               );
             })}
 
-         
+   
+          </nav>
+        </div>
 
         {/* Footer - Fixed */}
         {!isCollapsed && (
