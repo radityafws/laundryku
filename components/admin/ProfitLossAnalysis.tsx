@@ -25,13 +25,11 @@ interface ProfitLossData {
 interface ProfitLossAnalysisProps {
   data?: ProfitLossData;
   isLoading?: boolean;
-  hideYearlyExpenses?: boolean;
 }
 
 export default function ProfitLossAnalysis({ 
   data, 
-  isLoading = false,
-  hideYearlyExpenses = false 
+  isLoading = false
 }: ProfitLossAnalysisProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -161,11 +159,6 @@ export default function ProfitLossAnalysis({
                   <h5 className="font-semibold text-red-800 mb-3 flex items-center space-x-2">
                     <span>💸</span>
                     <span>Pengeluaran</span>
-                    {hideYearlyExpenses && (
-                      <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full">
-                        Tanpa Tahunan
-                      </span>
-                    )}
                   </h5>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
@@ -176,7 +169,7 @@ export default function ProfitLossAnalysis({
                       <span className="text-red-700">Gaji Karyawan</span>
                       <span className="font-medium text-red-800">{formatCurrency(data.expenses.salary)}</span>
                     </div>
-                    {(!hideYearlyExpenses && data.expenses.rent > 0) && (
+                    {data.expenses.rent > 0 && (
                       <div className="flex justify-between">
                         <span className="text-red-700">Sewa</span>
                         <span className="font-medium text-red-800">{formatCurrency(data.expenses.rent)}</span>
@@ -275,7 +268,7 @@ export default function ProfitLossAnalysis({
                   {[
                     { label: 'Operasional', value: data.expenses.operational, color: 'bg-red-400' },
                     { label: 'Gaji', value: data.expenses.salary, color: 'bg-orange-400' },
-                    ...((!hideYearlyExpenses && data.expenses.rent > 0) ? [{ label: 'Sewa', value: data.expenses.rent, color: 'bg-yellow-400' }] : []),
+                    ...(data.expenses.rent > 0 ? [{ label: 'Sewa', value: data.expenses.rent, color: 'bg-yellow-400' }] : []),
                     { label: 'Utilitas', value: data.expenses.utilities, color: 'bg-pink-400' },
                     { label: 'Perawatan', value: data.expenses.maintenance, color: 'bg-indigo-400' },
                     { label: 'Lainnya', value: data.expenses.other, color: 'bg-gray-400' }

@@ -40,6 +40,7 @@ export interface Transaction {
   description: string;
   amount: number;
   notes?: string;
+  expenseType?: string;
 }
 
 export interface ChartDataPoint {
@@ -70,20 +71,19 @@ export interface ReportsData {
 }
 
 interface UseReportsDataParams {
-  reportType: 'daily' | 'monthly' | 'yearly';
   dateRange: {
     startDate: string;
     endDate: string;
   };
-  hideYearlyExpenses?: boolean;
+  selectedExpenseTypes?: string[];
 }
 
 // Mock data generator
 const generateMockReportsData = (params: UseReportsDataParams): ReportsData => {
-  const { reportType, dateRange, hideYearlyExpenses } = params;
+  const { dateRange, selectedExpenseTypes = [] } = params;
   
   // Generate mock transactions
-  const transactions: Transaction[] = [
+  let transactions: Transaction[] = [
     // Income transactions
     {
       id: '1',
@@ -125,14 +125,15 @@ const generateMockReportsData = (params: UseReportsDataParams): ReportsData => {
       description: 'Pesanan laundry reguler - INV005',
       amount: 28000
     },
-    // Expense transactions
+    // Expense transactions with different types
     {
       id: '6',
       date: '2025-01-20',
       type: 'expense',
       category: 'Listrik',
       description: 'Tagihan listrik bulan Januari',
-      amount: 850000
+      amount: 850000,
+      expenseType: 'monthly'
     },
     {
       id: '7',
@@ -140,7 +141,8 @@ const generateMockReportsData = (params: UseReportsDataParams): ReportsData => {
       type: 'expense',
       category: 'Detergen',
       description: 'Pembelian detergen dan pelembut',
-      amount: 450000
+      amount: 450000,
+      expenseType: 'routine'
     },
     {
       id: '8',
@@ -148,7 +150,8 @@ const generateMockReportsData = (params: UseReportsDataParams): ReportsData => {
       type: 'expense',
       category: 'Gaji',
       description: 'Gaji karyawan minggu ke-3',
-      amount: 1200000
+      amount: 1200000,
+      expenseType: 'routine'
     },
     {
       id: '9',
@@ -156,7 +159,8 @@ const generateMockReportsData = (params: UseReportsDataParams): ReportsData => {
       type: 'expense',
       category: 'Air',
       description: 'Tagihan air PDAM',
-      amount: 275000
+      amount: 275000,
+      expenseType: 'monthly'
     },
     {
       id: '10',
@@ -164,28 +168,63 @@ const generateMockReportsData = (params: UseReportsDataParams): ReportsData => {
       type: 'expense',
       category: 'Perawatan',
       description: 'Service mesin cuci unit 2',
-      amount: 350000
+      amount: 350000,
+      expenseType: 'one_time'
     },
-    // Add yearly expenses if not hidden
-    ...(hideYearlyExpenses ? [] : [
-      {
-        id: '11',
-        date: '2025-01-15',
-        type: 'expense' as const,
-        category: 'Sewa',
-        description: 'Sewa gedung tahunan 2025',
-        amount: 24000000
-      },
-      {
-        id: '12',
-        date: '2025-01-15',
-        type: 'expense' as const,
-        category: 'Asuransi',
-        description: 'Asuransi bisnis tahunan',
-        amount: 3600000
-      }
-    ])
+    {
+      id: '11',
+      date: '2025-01-15',
+      type: 'expense',
+      category: 'Sewa',
+      description: 'Sewa gedung tahunan 2025',
+      amount: 24000000,
+      expenseType: 'yearly'
+    },
+    {
+      id: '12',
+      date: '2025-01-15',
+      type: 'expense',
+      category: 'Asuransi',
+      description: 'Asuransi bisnis tahunan',
+      amount: 3600000,
+      expenseType: 'yearly'
+    },
+    {
+      id: '13',
+      date: '2025-01-14',
+      type: 'expense',
+      category: 'Maintenance',
+      description: 'Pemeliharaan rutin peralatan',
+      amount: 200000,
+      expenseType: 'routine'
+    },
+    {
+      id: '14',
+      date: '2025-01-13',
+      type: 'expense',
+      category: 'Supplies',
+      description: 'Pembelian alat kebersihan',
+      amount: 125000,
+      expenseType: 'one_time'
+    },
+    {
+      id: '15',
+      date: '2025-01-12',
+      type: 'expense',
+      category: 'Marketing',
+      description: 'Biaya promosi media sosial',
+      amount: 300000,
+      expenseType: 'other'
+    }
   ];
+
+  // Filter transactions by expense type if specified
+  if (selectedExpenseTypes.length > 0) {
+    transactions = transactions.filter(transaction => {
+      if (transaction.type === 'income') return true; // Always include income
+      return selectedExpenseTypes.includes(transaction.expenseType || 'one_time');
+    });
+  }
 
   // Calculate totals
   const totalRevenue = transactions
@@ -202,7 +241,7 @@ const generateMockReportsData = (params: UseReportsDataParams): ReportsData => {
   // Generate chart data
   const chartData: ChartDataPoint[] = [
     { date: '2025-01-14', revenue: 180000, orders: 8, expenses: 320000, profit: -140000 },
-    { date: '2025-01-15', revenue: 220000, orders: 12, expenses: hideYearlyExpenses ? 280000 : 28000000, profit: hideYearlyExpenses ? -60000 : -27780000 },
+    { date: '2025-01-15', revenue: 220000, orders: 12, expenses: 28000000, profit: -27780000 },
     { date: '2025-01-16', revenue: 195000, orders: 9, expenses: 450000, profit: -255000 },
     { date: '2025-01-17', revenue: 285000, orders: 15, expenses: 375000, profit: -90000 },
     { date: '2025-01-18', revenue: 260000, orders: 11, expenses: 1300000, profit: -1040000 },
@@ -217,8 +256,8 @@ const generateMockReportsData = (params: UseReportsDataParams): ReportsData => {
       netProfit,
       totalOrders,
       revenueTrend: 12.5,
-      expensesTrend: hideYearlyExpenses ? 8.3 : 45.2,
-      profitTrend: hideYearlyExpenses ? 15.7 : -85.4,
+      expensesTrend: 8.3,
+      profitTrend: 15.7,
       ordersTrend: 18.2
     },
     profitLoss: {
@@ -229,12 +268,12 @@ const generateMockReportsData = (params: UseReportsDataParams): ReportsData => {
         total: totalRevenue
       },
       expenses: {
-        operational: hideYearlyExpenses ? 1200000 : 1200000,
+        operational: 1200000,
         salary: 1200000,
-        rent: hideYearlyExpenses ? 0 : 24000000,
+        rent: selectedExpenseTypes.includes('yearly') || selectedExpenseTypes.length === 0 ? 24000000 : 0,
         utilities: 1125000,
         maintenance: 350000,
-        other: hideYearlyExpenses ? 450000 : 4050000,
+        other: 450000,
         total: totalExpenses
       },
       netProfit,

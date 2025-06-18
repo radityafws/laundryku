@@ -22,8 +22,15 @@ const ComparisonChart = dynamic(
   { ssr: false }
 );
 
+const expenseTypeOptions = [
+  { value: 'monthly', label: 'Bulanan', icon: '📅' },
+  { value: 'yearly', label: 'Tahunan', icon: '🗓️' },
+  { value: 'one_time', label: 'Satu Kali', icon: '🔄' },
+  { value: 'routine', label: 'Rutin', icon: '🔁' },
+  { value: 'other', label: 'Lainnya', icon: '📋' }
+];
+
 export default function ReportsPage() {
-  const [reportType, setReportType] = useState<'daily' | 'monthly' | 'yearly'>('monthly');
   const [dateRange, setDateRange] = useState(() => {
     // Default to current month
     const today = new Date();
@@ -37,8 +44,8 @@ export default function ReportsPage() {
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [transactionFilter, setTransactionFilter] = useState('all');
+  const [selectedExpenseTypes, setSelectedExpenseTypes] = useState<string[]>([]);
   const [showExportModal, setShowExportModal] = useState(false);
-  const [hideYearlyExpenses, setHideYearlyExpenses] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 15;
 
@@ -46,9 +53,8 @@ export default function ReportsPage() {
   const debouncedSearchTerm = useDebounce(searchTerm, 400);
 
   const { data: reportsData, isLoading, refetch } = useReportsData({
-    reportType,
     dateRange,
-    hideYearlyExpenses
+    selectedExpenseTypes
   });
 
   // Filter transactions based on search and filters
@@ -70,7 +76,7 @@ export default function ReportsPage() {
   // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearchTerm, transactionFilter, dateRange, reportType]);
+  }, [debouncedSearchTerm, transactionFilter, dateRange, selectedExpenseTypes]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -102,51 +108,18 @@ export default function ReportsPage() {
   const resetFilters = () => {
     setSearchTerm('');
     setTransactionFilter('all');
+    setSelectedExpenseTypes([]);
     setDateRange({ startDate: '', endDate: '' });
   };
 
-  const hasActiveFilters = searchTerm || transactionFilter !== 'all' || dateRange.startDate || dateRange.endDate;
+  const hasActiveFilters = searchTerm || transactionFilter !== 'all' || selectedExpenseTypes.length > 0 || dateRange.startDate || dateRange.endDate;
 
-  const handleQuickDateRange = (type: string) => {
-    const today = new Date();
-    let startDate: Date;
-    let endDate: Date = new Date(today);
-
-    switch (type) {
-      case 'today':
-        startDate = new Date(today);
-        endDate = new Date(today);
-        break;
-      case 'this_week':
-        startDate = new Date(today);
-        startDate.setDate(today.getDate() - today.getDay());
-        endDate = new Date(startDate);
-        endDate.setDate(startDate.getDate() + 6);
-        break;
-      case 'this_month':
-        startDate = new Date(today.getFullYear(), today.getMonth(), 1);
-        endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-        break;
-      case 'this_year':
-        startDate = new Date(today.getFullYear(), 0, 1);
-        endDate = new Date(today.getFullYear(), 11, 31);
-        break;
-      case 'last_month':
-        startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-        endDate = new Date(today.getFullYear(), today.getMonth(), 0);
-        break;
-      case 'last_year':
-        startDate = new Date(today.getFullYear() - 1, 0, 1);
-        endDate = new Date(today.getFullYear() - 1, 11, 31);
-        break;
-      default:
-        return;
-    }
-
-    setDateRange({
-      startDate: startDate.toISOString().split('T')[0],
-      endDate: endDate.toISOString().split('T')[0]
-    });
+  const handleExpenseTypeToggle = (expenseType: string) => {
+    setSelectedExpenseTypes(prev => 
+      prev.includes(expenseType)
+        ? prev.filter(type => type !== expenseType)
+        : [...prev, expenseType]
+    );
   };
 
   return (
@@ -158,8 +131,8 @@ export default function ReportsPage() {
             {/* Header */}
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
               <div>
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-900">📊 Filter Periode & Jenis Laporan</h2>
-                <p className="text-sm text-gray-600">Pilih periode dan jenis laporan yang ingin ditampilkan</p>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900">📊 Filter Periode & Jenis Pengeluaran</h2>
+                <p className="text-sm text-gray-600">Pilih periode dan jenis pengeluaran yang ingin ditampilkan</p>
               </div>
               
               <button
@@ -171,35 +144,10 @@ export default function ReportsPage() {
               </button>
             </div>
 
-            {/* Quick Date Shortcuts */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                ⚡ Shortcut Periode
-              </label>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
-                {[
-                  { key: 'today', label: 'Hari Ini' },
-                  { key: 'this_week', label: 'Minggu Ini' },
-                  { key: 'this_month', label: 'Bulan Ini' },
-                  { key: 'this_year', label: 'Tahun Ini' },
-                  { key: 'last_month', label: 'Bulan Lalu' },
-                  { key: 'last_year', label: 'Tahun Lalu' }
-                ].map((shortcut) => (
-                  <button
-                    key={shortcut.key}
-                    onClick={() => handleQuickDateRange(shortcut.key)}
-                    className="px-3 py-2 text-sm bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition-colors font-medium"
-                  >
-                    {shortcut.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
             {/* Main Filters */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Date Range */}
-              <div className="lg:col-span-2">
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   📅 Rentang Tanggal
                 </label>
@@ -210,37 +158,50 @@ export default function ReportsPage() {
                 />
               </div>
 
-              {/* Report Type */}
+              {/* Expense Type Filter */}
               <div>
-                <label htmlFor="report-type" className="block text-sm font-medium text-gray-700 mb-2">
-                  📈 Jenis Laporan
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  🏷️ Filter Jenis Pengeluaran
                 </label>
-                <select
-                  id="report-type"
-                  value={reportType}
-                  onChange={(e) => setReportType(e.target.value as 'daily' | 'monthly' | 'yearly')}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-300 outline-none"
-                >
-                  <option value="daily">Harian</option>
-                  <option value="monthly">Bulanan</option>
-                  <option value="yearly">Tahunan</option>
-                </select>
-              </div>
-
-              {/* Yearly Expenses Toggle */}
-              <div className="flex items-center">
-                <label className="flex items-center space-x-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={hideYearlyExpenses}
-                    onChange={(e) => setHideYearlyExpenses(e.target.checked)}
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                  />
-                  <div>
-                    <span className="text-sm font-medium text-gray-700">Sembunyikan Pengeluaran Tahunan</span>
-                    <p className="text-xs text-gray-500">Untuk laporan bulanan yang proporsional</p>
+                <div className="space-y-2 max-h-40 overflow-y-auto border border-gray-200 rounded-xl p-3">
+                  {expenseTypeOptions.map((option) => (
+                    <label
+                      key={option.value}
+                      className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedExpenseTypes.includes(option.value)}
+                        onChange={() => handleExpenseTypeToggle(option.value)}
+                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      />
+                      <span className="text-lg">{option.icon}</span>
+                      <span className="text-sm font-medium text-gray-900">{option.label}</span>
+                    </label>
+                  ))}
+                </div>
+                {selectedExpenseTypes.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {selectedExpenseTypes.map((type) => {
+                      const option = expenseTypeOptions.find(opt => opt.value === type);
+                      return (
+                        <span
+                          key={type}
+                          className="inline-flex items-center space-x-1 bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-medium"
+                        >
+                          <span>{option?.icon}</span>
+                          <span>{option?.label}</span>
+                          <button
+                            onClick={() => handleExpenseTypeToggle(type)}
+                            className="ml-1 text-blue-500 hover:text-blue-700"
+                          >
+                            ✕
+                          </button>
+                        </span>
+                      );
+                    })}
                   </div>
-                </label>
+                )}
               </div>
             </div>
 
@@ -248,6 +209,11 @@ export default function ReportsPage() {
             <div className="flex items-center justify-between text-sm text-gray-600 pt-4 border-t border-gray-200">
               <span>
                 Periode aktif: <span className="font-medium text-blue-600">{formatDateRange()}</span>
+                {selectedExpenseTypes.length > 0 && (
+                  <span className="ml-2">
+                    | Filter: <span className="font-medium text-purple-600">{selectedExpenseTypes.length} jenis pengeluaran</span>
+                  </span>
+                )}
               </span>
               {hasActiveFilters && (
                 <button
@@ -308,7 +274,6 @@ export default function ReportsPage() {
         <ProfitLossAnalysis 
           data={reportsData?.profitLoss} 
           isLoading={isLoading}
-          hideYearlyExpenses={hideYearlyExpenses}
         />
 
         {/* Charts */}
@@ -317,14 +282,12 @@ export default function ReportsPage() {
           <RevenueChart 
             data={reportsData?.chartData} 
             isLoading={isLoading}
-            reportType={reportType}
           />
           
           {/* Comparison Chart */}
           <ComparisonChart 
             data={reportsData?.comparisonData} 
             isLoading={isLoading}
-            reportType={reportType}
           />
         </div>
 
@@ -414,7 +377,7 @@ export default function ReportsPage() {
           onClose={() => setShowExportModal(false)}
           reportData={reportsData}
           dateRange={dateRange}
-          reportType={reportType}
+          selectedExpenseTypes={selectedExpenseTypes}
         />
       )}
     </DashboardLayout>

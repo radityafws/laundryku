@@ -21,7 +21,7 @@ interface ExportReportModalProps {
     startDate: string;
     endDate: string;
   };
-  reportType: 'daily' | 'monthly' | 'yearly';
+  selectedExpenseTypes?: string[];
 }
 
 interface ExportFormData {
@@ -38,7 +38,7 @@ export default function ExportReportModal({
   onClose,
   reportData,
   dateRange,
-  reportType
+  selectedExpenseTypes = []
 }: ExportReportModalProps) {
   const [isExporting, setIsExporting] = useState(false);
 
@@ -71,7 +71,7 @@ export default function ExportReportModal({
         ...data,
         reportData,
         dateRange,
-        reportType,
+        selectedExpenseTypes,
         exportedAt: new Date().toISOString()
       };
 
@@ -135,13 +135,12 @@ export default function ExportReportModal({
     return `${formatDate(dateRange.startDate)} - ${formatDate(dateRange.endDate)}`;
   };
 
-  const getReportTypeText = () => {
-    switch (reportType) {
-      case 'daily': return 'Harian';
-      case 'monthly': return 'Bulanan';
-      case 'yearly': return 'Tahunan';
-      default: return reportType;
-    }
+  const expenseTypeLabels: { [key: string]: string } = {
+    monthly: 'Bulanan',
+    yearly: 'Tahunan',
+    one_time: 'Satu Kali',
+    routine: 'Rutin',
+    other: 'Lainnya'
   };
 
   return (
@@ -164,16 +163,21 @@ export default function ExportReportModal({
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
-              <span className="text-blue-600">Jenis Laporan:</span>
-              <div className="font-semibold text-blue-900">{getReportTypeText()}</div>
-            </div>
-            <div>
               <span className="text-blue-600">Periode:</span>
               <div className="font-semibold text-blue-900">{formatDateRange()}</div>
             </div>
             <div>
               <span className="text-blue-600">Total Transaksi:</span>
               <div className="font-semibold text-blue-900">{reportData?.transactions?.length || 0}</div>
+            </div>
+            <div className="md:col-span-2">
+              <span className="text-blue-600">Filter Jenis Pengeluaran:</span>
+              <div className="font-semibold text-blue-900">
+                {selectedExpenseTypes.length > 0 
+                  ? selectedExpenseTypes.map(type => expenseTypeLabels[type] || type).join(', ')
+                  : 'Semua jenis pengeluaran'
+                }
+              </div>
             </div>
             <div>
               <span className="text-blue-600">Dibuat:</span>

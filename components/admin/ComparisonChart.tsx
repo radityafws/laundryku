@@ -38,13 +38,11 @@ interface ComparisonData {
 interface ComparisonChartProps {
   data?: ComparisonData;
   isLoading?: boolean;
-  reportType: 'daily' | 'monthly' | 'yearly';
 }
 
 export default function ComparisonChart({ 
   data, 
-  isLoading = false,
-  reportType 
+  isLoading = false
 }: ComparisonChartProps) {
   const chartRef = useRef<ChartJS>(null);
 
@@ -128,7 +126,7 @@ export default function ComparisonChart({
     plugins: {
       title: {
         display: true,
-        text: `Perbandingan Periode (${reportType === 'daily' ? 'Harian' : reportType === 'monthly' ? 'Bulanan' : 'Tahunan'})`,
+        text: 'Perbandingan Periode',
         font: {
           size: 14,
           weight: 'bold',

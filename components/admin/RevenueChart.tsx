@@ -37,13 +37,11 @@ interface ChartDataPoint {
 interface RevenueChartProps {
   data?: ChartDataPoint[];
   isLoading?: boolean;
-  reportType: 'daily' | 'monthly' | 'yearly';
 }
 
 export default function RevenueChart({ 
   data, 
-  isLoading = false,
-  reportType 
+  isLoading = false
 }: RevenueChartProps) {
   const chartRef = useRef<ChartJS>(null);
 
@@ -58,22 +56,10 @@ export default function RevenueChart({
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    switch (reportType) {
-      case 'daily':
-        return date.toLocaleDateString('id-ID', { 
-          day: '2-digit',
-          month: 'short'
-        });
-      case 'monthly':
-        return date.toLocaleDateString('id-ID', { 
-          month: 'short',
-          year: '2-digit'
-        });
-      case 'yearly':
-        return date.getFullYear().toString();
-      default:
-        return dateStr;
-    }
+    return date.toLocaleDateString('id-ID', { 
+      day: '2-digit',
+      month: 'short'
+    });
   };
 
   if (isLoading || !data) {
@@ -130,7 +116,7 @@ export default function RevenueChart({
     plugins: {
       title: {
         display: true,
-        text: `Tren Pendapatan & Pesanan (${reportType === 'daily' ? 'Harian' : reportType === 'monthly' ? 'Bulanan' : 'Tahunan'})`,
+        text: 'Tren Pendapatan & Pesanan',
         font: {
           size: 14,
           weight: 'bold',
