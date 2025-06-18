@@ -23,9 +23,9 @@ export default function AdminDashboard() {
 
   return (
     <DashboardLayout title="Dashboard" subtitle="Overview & Statistics">
-      <div className="space-y-8">
-        {/* Main Statistics - Better Grid Layout */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+      <div className="space-y-6 sm:space-y-8">
+        {/* Main Statistics */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
           <StatsCard
             icon="📦"
             title="Total Pesanan Hari Ini"
@@ -66,7 +66,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Secondary Statistics Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
           <StatsCard
             icon="👥"
             title="Total Pelanggan"
@@ -106,7 +106,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Chart Section */}
-        <div className="grid grid-cols-1">
+        <div className="w-full">
           <DashboardChart
             labels={chartData?.labels || []}
             orderData={chartData?.orderData || []}
@@ -116,47 +116,47 @@ export default function AdminDashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                <span className="text-2xl">🧾</span>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+          <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
+            <div className="flex items-center space-x-3 sm:space-x-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                <span className="text-lg sm:text-2xl">🧾</span>
               </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-gray-900">Pesanan Baru</h3>
-                <p className="text-sm text-gray-600">Kelola pesanan masuk</p>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-gray-900 text-sm sm:text-base">Pesanan Baru</h3>
+                <p className="text-xs sm:text-sm text-gray-600">Kelola pesanan masuk</p>
               </div>
-              <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+              <button className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg font-medium transition-colors text-xs sm:text-sm">
                 Lihat
               </button>
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                <span className="text-2xl">📊</span>
+          <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
+            <div className="flex items-center space-x-3 sm:space-x-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                <span className="text-lg sm:text-2xl">📊</span>
               </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-gray-900">Laporan Harian</h3>
-                <p className="text-sm text-gray-600">Lihat performa hari ini</p>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-gray-900 text-sm sm:text-base">Laporan Harian</h3>
+                <p className="text-xs sm:text-sm text-gray-600">Lihat performa hari ini</p>
               </div>
-              <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+              <button className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg font-medium transition-colors text-xs sm:text-sm">
                 Buat
               </button>
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-                <span className="text-2xl">⚙️</span>
+          <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 md:col-span-2 xl:col-span-1">
+            <div className="flex items-center space-x-3 sm:space-x-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                <span className="text-lg sm:text-2xl">⚙️</span>
               </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-gray-900">Pengaturan</h3>
-                <p className="text-sm text-gray-600">Konfigurasi sistem</p>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-gray-900 text-sm sm:text-base">Pengaturan</h3>
+                <p className="text-xs sm:text-sm text-gray-600">Konfigurasi sistem</p>
               </div>
-              <button className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+              <button className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg font-medium transition-colors text-xs sm:text-sm">
                 Atur
               </button>
             </div>

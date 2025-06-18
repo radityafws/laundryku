@@ -59,7 +59,7 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse
       {/* Mobile Overlay */}
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 xl:hidden"
           onClick={onClose}
         />
       )}
@@ -69,41 +69,33 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse
         fixed top-0 left-0 h-full bg-white shadow-2xl z-50 transform transition-all duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
         ${isCollapsed ? 'w-20' : 'w-80'}
-        lg:translate-x-0 lg:static lg:shadow-none lg:border-r lg:border-gray-200
+        xl:translate-x-0 xl:static xl:shadow-none xl:border-r xl:border-gray-200
       `}>
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
           <div className={`flex items-center space-x-3 transition-all duration-300 ${isCollapsed ? 'justify-center' : ''}`}>
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0">
-              <span className="text-white font-bold">🧺</span>
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0">
+              <span className="text-white font-bold text-sm sm:text-base">🧺</span>
             </div>
             {!isCollapsed && (
               <div className="transition-opacity duration-300">
-                <h1 className="text-xl font-bold text-gray-800">LaundryKilat</h1>
-                <p className="text-sm text-gray-500">Admin Panel</p>
+                <h1 className="text-lg sm:text-xl font-bold text-gray-800">LaundryKilat</h1>
+                <p className="text-xs sm:text-sm text-gray-500">Admin Panel</p>
               </div>
             )}
           </div>
           
-          {/* Desktop collapse button */}
-          <button
-            onClick={onToggleCollapse}
-            className="hidden lg:block p-2 rounded-lg hover:bg-gray-100 transition-colors"
-          >
-            <span className="text-lg">{isCollapsed ? '→' : '←'}</span>
-          </button>
-          
           {/* Close button for mobile */}
           <button
             onClick={onClose}
-            className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="xl:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
           >
-            <span className="text-xl">✕</span>
+            <span className="text-lg sm:text-xl">✕</span>
           </button>
         </div>
 
         {/* Navigation */}
-        <nav className="p-4 space-y-2 overflow-y-auto flex-1">
+        <nav className="p-2 sm:p-4 space-y-1 sm:space-y-2 overflow-y-auto flex-1">
           {menuItems.map((item, index) => {
             const isActive = pathname === item.href;
             
@@ -113,7 +105,7 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse
                 href={item.href}
                 onClick={onClose}
                 className={`
-                  flex items-center space-x-4 p-4 rounded-xl transition-all duration-300 group relative
+                  flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 rounded-xl transition-all duration-300 group relative
                   ${isActive 
                     ? 'bg-blue-50 border-2 border-blue-200 text-blue-700' 
                     : 'hover:bg-gray-50 border-2 border-transparent hover:border-gray-200'
@@ -123,7 +115,7 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse
                 title={isCollapsed ? item.label : ''}
               >
                 <div className={`
-                  w-12 h-12 rounded-xl flex items-center justify-center text-xl transition-all duration-300 flex-shrink-0
+                  w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-lg sm:text-xl transition-all duration-300 flex-shrink-0
                   ${isActive 
                     ? 'bg-blue-100 text-blue-600' 
                     : 'bg-gray-100 text-gray-600 group-hover:bg-blue-100 group-hover:text-blue-600'
@@ -135,7 +127,7 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse
                 {!isCollapsed && (
                   <div className="flex-1 min-w-0 transition-opacity duration-300">
                     <div className="flex items-center justify-between">
-                      <h3 className={`font-semibold truncate ${
+                      <h3 className={`font-semibold truncate text-sm sm:text-base ${
                         isActive ? 'text-blue-700' : 'text-gray-900'
                       }`}>
                         {item.label}
@@ -146,7 +138,7 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse
                         </span>
                       )}
                     </div>
-                    <p className={`text-sm truncate ${
+                    <p className={`text-xs sm:text-sm truncate ${
                       isActive ? 'text-blue-600' : 'text-gray-500'
                     }`}>
                       {item.description}
@@ -173,12 +165,12 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse
 
         {/* Footer */}
         {!isCollapsed && (
-          <div className="p-4 border-t border-gray-200">
-            <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-xl border border-blue-200">
-              <div className="flex items-center space-x-3">
-                <div className="text-2xl">💡</div>
+          <div className="p-2 sm:p-4 border-t border-gray-200">
+            <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-3 sm:p-4 rounded-xl border border-blue-200">
+              <div className="flex items-center space-x-2 sm:space-x-3">
+                <div className="text-lg sm:text-2xl">💡</div>
                 <div>
-                  <h4 className="font-semibold text-gray-900 text-sm">Tips</h4>
+                  <h4 className="font-semibold text-gray-900 text-xs sm:text-sm">Tips</h4>
                   <p className="text-xs text-gray-600">
                     Gunakan shortcut Ctrl+K untuk pencarian cepat
                   </p>

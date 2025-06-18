@@ -86,19 +86,22 @@ export default function DashboardChart({
         display: true,
         text: 'Tren Pesanan & Pendapatan (7 Hari Terakhir)',
         font: {
-          size: 16,
+          size: 14,
           weight: 'bold',
         },
         color: '#1f2937',
-        padding: 20,
+        padding: {
+          top: 10,
+          bottom: 20
+        },
       },
       legend: {
         position: 'top' as const,
         labels: {
           usePointStyle: true,
-          padding: 20,
+          padding: 15,
           font: {
-            size: 12,
+            size: 11,
             weight: '500',
           },
         },
@@ -131,10 +134,11 @@ export default function DashboardChart({
         },
         ticks: {
           font: {
-            size: 11,
+            size: 10,
             weight: '500',
           },
           color: '#6b7280',
+          maxRotation: 45,
         },
       },
       y: {
@@ -145,7 +149,7 @@ export default function DashboardChart({
           display: true,
           text: 'Jumlah Pesanan',
           font: {
-            size: 12,
+            size: 11,
             weight: 'bold',
           },
           color: '#3b82f6',
@@ -155,7 +159,7 @@ export default function DashboardChart({
         },
         ticks: {
           font: {
-            size: 11,
+            size: 10,
           },
           color: '#6b7280',
         },
@@ -168,7 +172,7 @@ export default function DashboardChart({
           display: true,
           text: 'Pendapatan (Rp)',
           font: {
-            size: 12,
+            size: 11,
             weight: 'bold',
           },
           color: '#10b981',
@@ -178,7 +182,7 @@ export default function DashboardChart({
         },
         ticks: {
           font: {
-            size: 11,
+            size: 10,
           },
           color: '#6b7280',
           callback: function(value) {
@@ -191,18 +195,18 @@ export default function DashboardChart({
 
   if (isLoading) {
     return (
-      <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+      <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-lg border border-gray-100">
         <div className="animate-pulse">
-          <div className="h-6 bg-gray-200 rounded w-1/3 mb-4"></div>
-          <div className="h-80 bg-gray-200 rounded"></div>
+          <div className="h-4 sm:h-6 bg-gray-200 rounded w-1/3 mb-4"></div>
+          <div className="h-64 sm:h-80 bg-gray-200 rounded"></div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
-      <div className="h-80">
+    <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-lg border border-gray-100">
+      <div className="h-64 sm:h-80">
         <Chart ref={chartRef} type="bar" data={data} options={options} />
       </div>
     </div>

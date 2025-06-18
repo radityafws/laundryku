@@ -67,7 +67,7 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 flex">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
       {/* Sidebar */}
       <Sidebar 
         isOpen={sidebarOpen} 
@@ -77,7 +77,9 @@ export default function DashboardLayout({
       />
 
       {/* Main Content */}
-      <div className={`flex-1 transition-all duration-300 ${sidebarCollapsed ? 'lg:ml-20' : 'lg:ml-80'}`}>
+      <div className={`transition-all duration-300 lg:ml-0 ${
+        sidebarCollapsed ? 'xl:ml-20' : 'xl:ml-80'
+      }`}>
         {/* Top Header */}
         <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
           <div className="px-4 sm:px-6 lg:px-8">
@@ -87,30 +89,38 @@ export default function DashboardLayout({
                 {/* Mobile menu button */}
                 <button
                   onClick={() => setSidebarOpen(true)}
-                  className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                  className="xl:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
                 >
                   <span className="text-xl">☰</span>
                 </button>
 
+                {/* Desktop collapse button */}
+                <button
+                  onClick={handleToggleCollapse}
+                  className="hidden xl:block p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <span className="text-lg">{sidebarCollapsed ? '→' : '←'}</span>
+                </button>
+
                 <div>
-                  <h1 className="text-xl font-bold text-gray-900">{title}</h1>
-                  <p className="text-sm text-gray-500">{subtitle}</p>
+                  <h1 className="text-lg sm:text-xl font-bold text-gray-900">{title}</h1>
+                  <p className="text-xs sm:text-sm text-gray-500 hidden sm:block">{subtitle}</p>
                 </div>
               </div>
 
               {/* Right side */}
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2 sm:space-x-4">
                 {/* Notifications */}
                 <button className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                  <span className="text-xl">🔔</span>
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                  <span className="text-lg sm:text-xl">🔔</span>
+                  <span className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
                     3
                   </span>
                 </button>
 
                 {/* User Menu */}
-                <div className="flex items-center space-x-3">
-                  <div className="text-right hidden sm:block">
+                <div className="flex items-center space-x-2 sm:space-x-3">
+                  <div className="text-right hidden md:block">
                     <p className="text-sm font-medium text-gray-900">
                       {user?.name || user?.username}
                     </p>
@@ -119,14 +129,14 @@ export default function DashboardLayout({
                     </p>
                   </div>
                   
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-base">
                     {user?.name?.charAt(0) || user?.username?.charAt(0) || '?'}
                   </div>
                   
                   <button
                     onClick={handleLogout}
                     disabled={logoutMutation.isPending}
-                    className="bg-red-500 hover:bg-red-600 disabled:bg-red-400 text-white px-3 py-2 rounded-lg font-medium transition-all duration-300 flex items-center space-x-1 text-sm"
+                    className="bg-red-500 hover:bg-red-600 disabled:bg-red-400 text-white px-2 py-1 sm:px-3 sm:py-2 rounded-lg font-medium transition-all duration-300 flex items-center space-x-1 text-xs sm:text-sm"
                   >
                     {logoutMutation.isPending ? (
                       <>
