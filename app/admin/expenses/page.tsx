@@ -151,50 +151,6 @@ export default function ExpensesPage() {
           </div>
         </div>
 
-        {/* Summary Statistics */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-          <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
-                <span className="text-2xl">💸</span>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Total Pengeluaran</p>
-                <p className="text-2xl font-bold text-red-600">
-                  {formatCurrency(totalExpenses)}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                <span className="text-2xl">📊</span>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Jumlah Transaksi</p>
-                <p className="text-2xl font-bold text-blue-600">
-                  {totalCount}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                <span className="text-2xl">📈</span>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Rata-rata per Transaksi</p>
-                <p className="text-2xl font-bold text-green-600">
-                  {formatCurrency(totalCount ? totalExpenses / totalCount : 0)}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* Chart */}
         <ExpenseSummaryChart expenses={filteredExpenses} isLoading={isLoading} />
