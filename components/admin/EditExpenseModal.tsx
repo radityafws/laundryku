@@ -1,8 +1,8 @@
-'use client';
-
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import Modal from '@/components/ui/Modal';
+import Select from '@/components/ui/Select';
+import { useActiveEmployees } from '@/hooks/useEmployees';
 import { toast } from 'react-toastify';
 
 interface Expense {
@@ -12,6 +12,7 @@ interface Expense {
   amount: number;
   date: string;
   notes?: string;
+  employeeId?: string;
 }
 
 interface EditExpenseModalProps {
@@ -24,9 +25,17 @@ interface ExpenseFormData {
   date: string;
   category: string;
   customCategory?: string;
+  employeeId?: string;
   amount: number;
   description: string;
   notes?: string;
+}
+
+interface EmployeeOption {
+  value: string;
+  label: string;
+  role?: string;
+  salary?: number;
 }
 
 const categoryOptions = [
@@ -42,6 +51,9 @@ const categoryOptions = [
 export default function EditExpenseModal({ expense, isOpen, onClose }: EditExpenseModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCustomCategory, setShowCustomCategory] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState<EmployeeOption | null>(null);
+
+  const { data: employees, isLoading: employeesLoading } = useActiveEmployees();
 
   const {
     register,
@@ -49,10 +61,19 @@ export default function EditExpenseModal({ expense, isOpen, onClose }: EditExpen
     watch,
     formState: { errors },
     reset,
-    setValue
+    setValue,
+    clearErrors
   } = useForm<ExpenseFormData>();
 
   const watchedCategory = watch('category');
+
+  // Convert employees to select options
+  const employeeOptions: EmployeeOption[] = employees?.map(emp => ({
+    value: emp.id,
+    label: emp.name,
+    role: emp.role,
+    salary: emp.salary
+  })) || [];
 
   // Set initial values when expense changes
   useEffect(() => {
@@ -65,10 +86,17 @@ export default function EditExpenseModal({ expense, isOpen, onClose }: EditExpen
       setValue('amount', expense.amount);
       setValue('description', expense.description);
       setValue('notes', expense.notes || '');
+      setValue('employeeId', expense.employeeId || '');
       
       setShowCustomCategory(isCustomCategory);
+      
+      // Set selected employee if this is a salary expense
+      if (expense.category === 'salary' && expense.employeeId) {
+        const employee = employeeOptions.find(emp => emp.value === expense.employeeId);
+        setSelectedEmployee(employee || null);
+      }
     }
-  }, [expense, setValue]);
+  }, [expense, setValue, employeeOptions]);
 
   // Show custom category input when "other" is selected
   React.useEffect(() => {
@@ -78,7 +106,51 @@ export default function EditExpenseModal({ expense, isOpen, onClose }: EditExpen
     }
   }, [watchedCategory, setValue]);
 
+  // Handle salary category selection
+  React.useEffect(() => {
+    if (watchedCategory === 'salary') {
+      // Keep existing employee selection if editing salary expense
+      if (expense.category === 'salary' && expense.employeeId && !selectedEmployee) {
+        const employee = employeeOptions.find(emp => emp.value === expense.employeeId);
+        if (employee) {
+          setSelectedEmployee(employee);
+        }
+      }
+    } else {
+      // Clear employee-related fields when switching away from salary
+      if (expense.category !== 'salary') {
+        setSelectedEmployee(null);
+        setValue('employeeId', '');
+        clearErrors('employeeId');
+      }
+    }
+  }, [watchedCategory, setValue, clearErrors, expense, employeeOptions, selectedEmployee]);
+
+  // Handle employee selection for salary category
+  const handleEmployeeSelect = (employee: EmployeeOption | null) => {
+    setSelectedEmployee(employee);
+    
+    if (employee && watchedCategory === 'salary') {
+      setValue('employeeId', employee.value);
+      setValue('description', `Gaji Pegawai a.n ${employee.label}`);
+      setValue('amount', employee.salary || 0);
+      clearErrors('employeeId');
+    } else {
+      setValue('employeeId', '');
+      if (watchedCategory === 'salary') {
+        setValue('description', '');
+        setValue('amount', 0);
+      }
+    }
+  };
+
   const onSubmit = async (data: ExpenseFormData) => {
+    // Additional validation for salary category
+    if (data.category === 'salary' && !data.employeeId) {
+      toast.error('Pegawai harus dipilih untuk kategori Gaji!');
+      return;
+    }
+
     setIsSubmitting(true);
     
     try {
@@ -126,6 +198,7 @@ export default function EditExpenseModal({ expense, isOpen, onClose }: EditExpen
   const handleClose = () => {
     reset();
     setShowCustomCategory(false);
+    setSelectedEmployee(null);
     onClose();
   };
 
@@ -160,6 +233,24 @@ export default function EditExpenseModal({ expense, isOpen, onClose }: EditExpen
       currency: 'IDR',
       minimumFractionDigits: 0
     }).format(amount);
+  };
+
+  const getRoleIcon = (role: string) => {
+    switch (role) {
+      case 'admin': return '👑';
+      case 'staff': return '👨‍💼';
+      case 'driver': return '🚚';
+      default: return '👤';
+    }
+  };
+
+  const getRoleName = (role: string) => {
+    switch (role) {
+      case 'admin': return 'Administrator';
+      case 'staff': return 'Staff Laundry';
+      case 'driver': return 'Driver';
+      default: return 'Unknown';
+    }
   };
 
   return (
@@ -290,6 +381,59 @@ export default function EditExpenseModal({ expense, isOpen, onClose }: EditExpen
             </div>
           )}
 
+          {/* Employee Selection for Salary Category */}
+          {watchedCategory === 'salary' && (
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                👤 Pilih Pegawai <span className="text-red-500">*</span>
+              </label>
+              <Select
+                options={employeeOptions}
+                value={selectedEmployee}
+                onChange={handleEmployeeSelect}
+                placeholder="Pilih pegawai untuk pembayaran gaji..."
+                isSearchable={true}
+                isLoading={employeesLoading}
+                className="w-full"
+                error={errors.employeeId?.message}
+              />
+              <input
+                {...register('employeeId', {
+                  required: watchedCategory === 'salary' ? 'Pegawai wajib dipilih untuk kategori Gaji' : false
+                })}
+                type="hidden"
+              />
+              
+              {/* Employee Info Display */}
+              {selectedEmployee && (
+                <div className="mt-3 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                      <span className="text-lg">{getRoleIcon(selectedEmployee.role || '')}</span>
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-blue-800">{selectedEmployee.label}</h4>
+                      <p className="text-sm text-blue-600">{getRoleName(selectedEmployee.role || '')}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-blue-600">Gaji Standar:</p>
+                      <p className="font-bold text-blue-800">
+                        {selectedEmployee.salary ? 
+                          new Intl.NumberFormat('id-ID', {
+                            style: 'currency',
+                            currency: 'IDR',
+                            minimumFractionDigits: 0
+                          }).format(selectedEmployee.salary) : 
+                          'Tidak tersedia'
+                        }
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Amount */}
           <div>
             <label htmlFor="amount" className="block text-sm font-semibold text-gray-700 mb-2">
@@ -327,7 +471,10 @@ export default function EditExpenseModal({ expense, isOpen, onClose }: EditExpen
               </p>
             )}
             <p className="mt-1 text-xs text-gray-500">
-              Masukkan nominal dalam Rupiah (minimal Rp 1.000)
+              {watchedCategory === 'salary' ? 
+                'Nominal akan otomatis terisi sesuai gaji pegawai, tetap bisa diedit manual' :
+                'Masukkan nominal dalam Rupiah (minimal Rp 1.000)'
+              }
             </p>
           </div>
 
@@ -349,7 +496,10 @@ export default function EditExpenseModal({ expense, isOpen, onClose }: EditExpen
                 }
               })}
               type="text"
-              placeholder="Contoh: Pembelian detergen untuk bulan ini..."
+              placeholder={watchedCategory === 'salary' ? 
+                'Akan otomatis terisi saat memilih pegawai...' :
+                'Contoh: Pembelian detergen untuk bulan ini...'
+              }
               className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-4 focus:ring-purple-100 transition-all duration-300 outline-none ${
                 errors.description ? 'border-red-300 focus:border-red-500' : 'border-gray-200 focus:border-purple-500'
               }`}
@@ -361,7 +511,10 @@ export default function EditExpenseModal({ expense, isOpen, onClose }: EditExpen
               </p>
             )}
             <p className="mt-1 text-xs text-gray-500">
-              Jelaskan secara singkat untuk apa pengeluaran ini
+              {watchedCategory === 'salary' ? 
+                'Keterangan akan otomatis diisi dengan format "Gaji Pegawai a.n [Nama]"' :
+                'Jelaskan secara singkat untuk apa pengeluaran ini'
+              }
             </p>
           </div>
 
