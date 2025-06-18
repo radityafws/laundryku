@@ -118,13 +118,6 @@ export default function DashboardLayout({
                   <span className="text-xs bg-gray-300 px-1 rounded">Ctrl+K</span>
                 </button>
 
-                {/* Notifications */}
-                <button className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                  <span className="text-lg sm:text-xl">🔔</span>
-                  <span className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                    3
-                  </span>
-                </button>
 
                 {/* User Menu */}
                 <div className="flex items-center space-x-2 sm:space-x-3">
