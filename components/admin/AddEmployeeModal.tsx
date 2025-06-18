@@ -19,7 +19,6 @@ interface EmployeeFormData {
   role: string;
   customRole?: string;
   address?: string;
-  salary: number;
 }
 
 interface RoleOption {
@@ -68,15 +67,10 @@ export default function AddEmployeeModal({ isOpen, onClose }: AddEmployeeModalPr
     setError,
     clearErrors,
     setValue
-  } = useForm<EmployeeFormData>({
-    defaultValues: {
-      salary: 0
-    }
-  });
+  } = useForm<EmployeeFormData>();
 
   const watchedPhone = watch('phone');
   const watchedEmail = watch('email');
-  const watchedRole = watch('role');
 
   const debouncedPhone = useDebounce(watchedPhone, 500);
   const debouncedEmail = useDebounce(watchedEmail, 500);
@@ -163,20 +157,8 @@ export default function AddEmployeeModal({ isOpen, onClose }: AddEmployeeModalPr
     if (role) {
       setValue('role', role.value);
       clearErrors('role');
-      
-      // Set default salary based on role
-      const defaultSalaries = {
-        admin: 4500000,
-        staff: 3200000,
-        driver: 2800000
-      };
-      
-      if (role.value in defaultSalaries) {
-        setValue('salary', defaultSalaries[role.value as keyof typeof defaultSalaries]);
-      }
     } else {
       setValue('role', '');
-      setValue('salary', 0);
     }
   };
 
@@ -258,20 +240,6 @@ export default function AddEmployeeModal({ isOpen, onClose }: AddEmployeeModalPr
     setSelectedRole(null);
     setRoleOptions(defaultRoles);
     onClose();
-  };
-
-  const formatCurrency = (value: string) => {
-    const numericValue = value.replace(/[^\d]/g, '');
-    if (numericValue) {
-      const number = parseInt(numericValue);
-      return new Intl.NumberFormat('id-ID').format(number);
-    }
-    return '';
-  };
-
-  const handleSalaryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/[^\d]/g, '');
-    setValue('salary', parseInt(value) || 0);
   };
 
   return (
@@ -461,47 +429,6 @@ export default function AddEmployeeModal({ isOpen, onClose }: AddEmployeeModalPr
           )}
         </div>
 
-        {/* Salary Field */}
-        <div>
-          <label htmlFor="salary" className="block text-sm font-semibold text-gray-700 mb-2">
-            💰 Gaji Bulanan <span className="text-red-500">*</span>
-          </label>
-          <div className="relative">
-            <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">
-              Rp
-            </span>
-            <input
-              {...register('salary', {
-                required: 'Gaji bulanan wajib diisi',
-                min: {
-                  value: 1000000,
-                  message: 'Gaji minimal Rp 1.000.000'
-                },
-                max: {
-                  value: 50000000,
-                  message: 'Gaji maksimal Rp 50.000.000'
-                }
-              })}
-              type="text"
-              placeholder="0"
-              onChange={handleSalaryChange}
-              value={watch('salary') ? formatCurrency(watch('salary').toString()) : ''}
-              className={`w-full pl-12 pr-4 py-3 border-2 rounded-xl focus:ring-4 focus:ring-blue-100 transition-all duration-300 outline-none ${
-                errors.salary ? 'border-red-300 focus:border-red-500' : 'border-gray-200 focus:border-blue-500'
-              }`}
-            />
-          </div>
-          {errors.salary && (
-            <p className="mt-2 text-sm text-red-600 flex items-center space-x-1">
-              <span>❌</span>
-              <span>{errors.salary.message}</span>
-            </p>
-          )}
-          <p className="mt-1 text-xs text-gray-500">
-            Gaji akan otomatis terisi sesuai jabatan, tetap bisa diedit manual
-          </p>
-        </div>
-
         {/* Address Field */}
         <div>
           <label htmlFor="address" className="block text-sm font-semibold text-gray-700 mb-2">
@@ -537,8 +464,8 @@ export default function AddEmployeeModal({ isOpen, onClose }: AddEmployeeModalPr
               <ul className="text-sm text-blue-700 space-y-1">
                 <li>• Nomor HP dan email akan dicek otomatis untuk duplikasi</li>
                 <li>• Jabatan dapat dipilih dari daftar atau dibuat baru</li>
-                <li>• Gaji akan otomatis terisi sesuai jabatan standar</li>
                 <li>• Data pegawai dapat diubah setelah disimpan</li>
+                <li>• Status pegawai akan otomatis diset sebagai "Aktif"</li>
               </ul>
             </div>
           </div>

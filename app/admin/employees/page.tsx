@@ -46,7 +46,6 @@ export default function EmployeesPage() {
   // Calculate stats
   const totalEmployees = employees?.length || 0;
   const activeEmployees = employees?.filter(emp => emp.status === 'active').length || 0;
-  const totalSalary = employees?.reduce((sum, emp) => sum + emp.salary, 0) || 0;
 
   const handleEditEmployee = (employee: any) => {
     setEditingEmployee(employee);
@@ -70,19 +69,11 @@ export default function EmployeesPage() {
     refetch(); // Refresh data after modal closes
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      minimumFractionDigits: 0
-    }).format(amount);
-  };
-
   return (
     <DashboardLayout title="Manajemen Pegawai" subtitle="Kelola data pegawai dan karyawan">
       <div className="space-y-6">
         {/* Summary Cards */}
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-2 gap-6">
           <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
             <div className="flex items-center space-x-4">
               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
@@ -106,20 +97,6 @@ export default function EmployeesPage() {
                 <p className="text-sm text-gray-600">Pegawai Aktif</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {activeEmployees}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-                <span className="text-2xl">💰</span>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Total Gaji Bulanan</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {formatCurrency(totalSalary)}
                 </p>
               </div>
             </div>

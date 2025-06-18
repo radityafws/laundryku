@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
-// Employee interface
+// Employee interface (removed salary field)
 export interface Employee {
   id: string;
   name: string;
@@ -9,10 +9,10 @@ export interface Employee {
   phone: string;
   status: 'active' | 'inactive';
   joinDate: string;
-  salary: number;
+  address?: string;
 }
 
-// Mock employees data
+// Mock employees data (removed salary field)
 const mockEmployees: Employee[] = [
   {
     id: '1',
@@ -22,7 +22,7 @@ const mockEmployees: Employee[] = [
     phone: '081234567890',
     status: 'active',
     joinDate: '2023-01-15',
-    salary: 4500000
+    address: 'Jl. Sudirman No. 123, Solo'
   },
   {
     id: '2',
@@ -32,7 +32,7 @@ const mockEmployees: Employee[] = [
     phone: '081234567891',
     status: 'active',
     joinDate: '2023-03-20',
-    salary: 3200000
+    address: 'Jl. Slamet Riyadi No. 45, Solo'
   },
   {
     id: '3',
@@ -42,7 +42,7 @@ const mockEmployees: Employee[] = [
     phone: '081234567892',
     status: 'active',
     joinDate: '2023-06-10',
-    salary: 2800000
+    address: 'Jl. Ahmad Yani No. 67, Solo'
   },
   {
     id: '4',
@@ -52,7 +52,7 @@ const mockEmployees: Employee[] = [
     phone: '081234567893',
     status: 'active',
     joinDate: '2023-08-05',
-    salary: 3000000
+    address: 'Jl. Diponegoro No. 89, Solo'
   },
   {
     id: '5',
@@ -62,7 +62,7 @@ const mockEmployees: Employee[] = [
     phone: '081234567894',
     status: 'active',
     joinDate: '2023-11-12',
-    salary: 2700000
+    address: 'Jl. Gatot Subroto No. 12, Solo'
   },
   {
     id: '6',
@@ -72,7 +72,7 @@ const mockEmployees: Employee[] = [
     phone: '081234567895',
     status: 'inactive',
     joinDate: '2023-05-18',
-    salary: 3100000
+    address: 'Jl. Veteran No. 34, Solo'
   }
 ];
 

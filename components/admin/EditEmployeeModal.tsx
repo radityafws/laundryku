@@ -15,7 +15,6 @@ interface Employee {
   phone: string;
   status: 'active' | 'inactive';
   joinDate: string;
-  salary: number;
   address?: string;
 }
 
@@ -32,7 +31,6 @@ interface EmployeeFormData {
   role: string;
   customRole?: string;
   address?: string;
-  salary: number;
   status: 'active' | 'inactive';
 }
 
@@ -98,7 +96,6 @@ export default function EditEmployeeModal({ employee, isOpen, onClose }: EditEmp
       setValue('email', employee.email);
       setValue('role', employee.role);
       setValue('address', employee.address || '');
-      setValue('salary', employee.salary);
       setValue('status', employee.status);
       
       // Set selected role
@@ -201,17 +198,6 @@ export default function EditEmployeeModal({ employee, isOpen, onClose }: EditEmp
     if (role) {
       setValue('role', role.value);
       clearErrors('role');
-      
-      // Set default salary based on role (only if it's a default role)
-      const defaultSalaries = {
-        admin: 4500000,
-        staff: 3200000,
-        driver: 2800000
-      };
-      
-      if (role.value in defaultSalaries) {
-        setValue('salary', defaultSalaries[role.value as keyof typeof defaultSalaries]);
-      }
     } else {
       setValue('role', '');
     }
@@ -293,34 +279,12 @@ export default function EditEmployeeModal({ employee, isOpen, onClose }: EditEmp
     onClose();
   };
 
-  const formatCurrency = (value: string) => {
-    const numericValue = value.replace(/[^\d]/g, '');
-    if (numericValue) {
-      const number = parseInt(numericValue);
-      return new Intl.NumberFormat('id-ID').format(number);
-    }
-    return '';
-  };
-
-  const handleSalaryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/[^\d]/g, '');
-    setValue('salary', parseInt(value) || 0);
-  };
-
   const formatDateForDisplay = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('id-ID', {
       day: 'numeric',
       month: 'long',
       year: 'numeric'
     });
-  };
-
-  const formatCurrencyDisplay = (amount: number) => {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      minimumFractionDigits: 0
-    }).format(amount);
   };
 
   const getRoleIcon = (role: string) => {
@@ -596,44 +560,6 @@ export default function EditEmployeeModal({ employee, isOpen, onClose }: EditEmp
               <p className="mt-2 text-sm text-red-600 flex items-center space-x-1">
                 <span>❌</span>
                 <span>{errors.status.message}</span>
-              </p>
-            )}
-          </div>
-
-          {/* Salary Field */}
-          <div>
-            <label htmlFor="salary" className="block text-sm font-semibold text-gray-700 mb-2">
-              💰 Gaji Bulanan <span className="text-red-500">*</span>
-            </label>
-            <div className="relative">
-              <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">
-                Rp
-              </span>
-              <input
-                {...register('salary', {
-                  required: 'Gaji bulanan wajib diisi',
-                  min: {
-                    value: 1000000,
-                    message: 'Gaji minimal Rp 1.000.000'
-                  },
-                  max: {
-                    value: 50000000,
-                    message: 'Gaji maksimal Rp 50.000.000'
-                  }
-                })}
-                type="text"
-                placeholder="0"
-                onChange={handleSalaryChange}
-                value={watch('salary') ? formatCurrency(watch('salary').toString()) : ''}
-                className={`w-full pl-12 pr-4 py-3 border-2 rounded-xl focus:ring-4 focus:ring-blue-100 transition-all duration-300 outline-none ${
-                  errors.salary ? 'border-red-300 focus:border-red-500' : 'border-gray-200 focus:border-blue-500'
-                }`}
-              />
-            </div>
-            {errors.salary && (
-              <p className="mt-2 text-sm text-red-600 flex items-center space-x-1">
-                <span>❌</span>
-                <span>{errors.salary.message}</span>
               </p>
             )}
           </div>

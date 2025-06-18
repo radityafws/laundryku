@@ -10,7 +10,6 @@ interface Employee {
   phone: string;
   status: 'active' | 'inactive';
   joinDate: string;
-  salary: number;
   address?: string;
 }
 
@@ -57,14 +56,6 @@ export default function EmployeesTable({
     if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
     return 0;
   });
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      minimumFractionDigits: 0
-    }).format(amount);
-  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('id-ID', {
@@ -135,8 +126,7 @@ export default function EmployeesTable({
                 { key: 'name', label: 'Nama Lengkap' },
                 { key: 'phone', label: 'Nomor HP' },
                 { key: 'role', label: 'Jabatan' },
-                { key: 'status', label: 'Status' },
-                { key: 'salary', label: 'Gaji' }
+                { key: 'status', label: 'Status' }
               ].map((column) => (
                 <th
                   key={column.key}
@@ -186,9 +176,6 @@ export default function EmployeesTable({
                   <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(employee.status)}`}>
                     {getStatusText(employee.status)}
                   </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {formatCurrency(employee.salary)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div className="flex space-x-2">
@@ -248,10 +235,8 @@ export default function EmployeesTable({
                 </div>
               </div>
               <div>
-                <span className="text-gray-500">Gaji:</span>
-                <div className="font-medium text-green-600">
-                  {formatCurrency(employee.salary)}
-                </div>
+                <span className="text-gray-500">Bergabung:</span>
+                <div className="font-medium">{formatDate(employee.joinDate)}</div>
               </div>
             </div>
             
