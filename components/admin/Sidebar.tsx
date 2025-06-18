@@ -66,13 +66,13 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse
 
       {/* Sidebar */}
       <div className={`
-        fixed top-0 left-0 h-full bg-white shadow-2xl z-50 transform transition-all duration-300 ease-in-out
-        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+        bg-white shadow-2xl z-50 transition-all duration-300 ease-in-out flex flex-col
+        ${isOpen ? 'fixed inset-y-0 left-0' : 'fixed inset-y-0 -left-full'}
         ${isCollapsed ? 'w-20' : 'w-80'}
-        xl:translate-x-0 xl:static xl:shadow-none xl:border-r xl:border-gray-200
+        xl:relative xl:left-0 xl:shadow-lg xl:border-r xl:border-gray-200
       `}>
         {/* Header */}
-        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 flex-shrink-0">
           <div className={`flex items-center space-x-3 transition-all duration-300 ${isCollapsed ? 'justify-center' : ''}`}>
             <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0">
               <span className="text-white font-bold text-sm sm:text-base">🧺</span>
@@ -95,7 +95,7 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse
         </div>
 
         {/* Navigation */}
-        <nav className="p-2 sm:p-4 space-y-1 sm:space-y-2 overflow-y-auto flex-1">
+        <nav className="flex-1 p-2 sm:p-4 space-y-1 sm:space-y-2 overflow-y-auto">
           {menuItems.map((item, index) => {
             const isActive = pathname === item.href;
             
@@ -165,7 +165,7 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse
 
         {/* Footer */}
         {!isCollapsed && (
-          <div className="p-2 sm:p-4 border-t border-gray-200">
+          <div className="p-2 sm:p-4 border-t border-gray-200 flex-shrink-0">
             <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-3 sm:p-4 rounded-xl border border-blue-200">
               <div className="flex items-center space-x-2 sm:space-x-3">
                 <div className="text-lg sm:text-2xl">💡</div>

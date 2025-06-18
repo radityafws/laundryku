@@ -67,7 +67,7 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 flex">
       {/* Sidebar */}
       <Sidebar 
         isOpen={sidebarOpen} 
@@ -77,9 +77,7 @@ export default function DashboardLayout({
       />
 
       {/* Main Content */}
-      <div className={`transition-all duration-300 lg:ml-0 ${
-        sidebarCollapsed ? 'xl:ml-20' : 'xl:ml-80'
-      }`}>
+      <div className="flex-1 flex flex-col min-w-0">
         {/* Top Header */}
         <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
           <div className="px-4 sm:px-6 lg:px-8">
@@ -157,7 +155,7 @@ export default function DashboardLayout({
         </header>
 
         {/* Page Content */}
-        <main className="p-4 sm:p-6 lg:p-8">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto">
           {children}
         </main>
       </div>
