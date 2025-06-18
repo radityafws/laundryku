@@ -164,58 +164,7 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse
               );
             })}
 
-            {/* Additional Menu Items for Demo */}
-            <div className="pt-4 border-t border-gray-200 mt-4">
-              <div className={`text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 ${isCollapsed ? 'text-center' : 'px-4'}`}>
-                {isCollapsed ? '•••' : 'Tools'}
-              </div>
-              
-              {[
-                { icon: '📈', label: 'Analytics', href: '/admin/analytics' },
-                { icon: '🔔', label: 'Notifications', href: '/admin/notifications' },
-                { icon: '📱', label: 'Mobile App', href: '/admin/mobile' },
-                { icon: '🔒', label: 'Security', href: '/admin/security' },
-                { icon: '🌐', label: 'API Settings', href: '/admin/api' },
-                { icon: '📋', label: 'Audit Logs', href: '/admin/logs' },
-                { icon: '💾', label: 'Backup', href: '/admin/backup' },
-                { icon: '🎨', label: 'Themes', href: '/admin/themes' },
-                { icon: '📊', label: 'Reports', href: '/admin/advanced-reports' },
-                { icon: '⚡', label: 'Performance', href: '/admin/performance' }
-              ].map((item, index) => (
-                <Link
-                  key={`tool-${index}`}
-                  href={item.href}
-                  onClick={onClose}
-                  className={`
-                    flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 rounded-xl transition-all duration-300 group relative
-                    hover:bg-gray-50 border-2 border-transparent hover:border-gray-200
-                    ${isCollapsed ? 'justify-center' : ''}
-                  `}
-                  title={isCollapsed ? item.label : ''}
-                >
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-lg sm:text-xl transition-all duration-300 flex-shrink-0 bg-gray-100 text-gray-600 group-hover:bg-blue-100 group-hover:text-blue-600">
-                    {item.icon}
-                  </div>
-                  
-                  {!isCollapsed && (
-                    <div className="flex-1 min-w-0 transition-opacity duration-300">
-                      <h3 className="font-semibold truncate text-sm sm:text-base text-gray-900">
-                        {item.label}
-                      </h3>
-                    </div>
-                  )}
-
-                  {/* Tooltip for collapsed state */}
-                  {isCollapsed && (
-                    <div className="absolute left-full ml-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50">
-                      <div className="font-semibold">{item.label}</div>
-                    </div>
-                  )}
-                </Link>
-              ))}
-            </div>
-          </nav>
-        </div>
+         
 
         {/* Footer - Fixed */}
         {!isCollapsed && (
