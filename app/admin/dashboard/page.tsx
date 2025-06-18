@@ -76,7 +76,7 @@ export default function AdminDashboard() {
               isLoading={chartLoading}
             />
           </div>
-     
+       </div>
       </div>
     </DashboardLayout>
   );
