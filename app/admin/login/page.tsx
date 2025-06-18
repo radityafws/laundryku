@@ -14,6 +14,25 @@ interface LoginFormData {
   rememberMe: boolean;
 }
 
+const demoCredentials = [
+  {
+    username: 'admin',
+    password: 'admin123',
+    role: 'Admin',
+    description: 'Full access to all features',
+    icon: '👑',
+    color: 'from-purple-500 to-purple-600'
+  },
+  {
+    username: 'staff',
+    password: 'staff123',
+    role: 'Staff',
+    description: 'Limited access for daily operations',
+    icon: '👨‍💼',
+    color: 'from-blue-500 to-blue-600'
+  }
+];
+
 export default function LoginPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
@@ -24,6 +43,8 @@ export default function LoginPage() {
     handleSubmit,
     formState: { errors },
     setError,
+    setValue,
+    watch,
   } = useForm<LoginFormData>({
     defaultValues: {
       username: '',
@@ -33,6 +54,10 @@ export default function LoginPage() {
   });
 
   const loginMutation = useLogin();
+
+  // Watch form values for demo credential highlighting
+  const watchedUsername = watch('username');
+  const watchedPassword = watch('password');
 
   // Check if already authenticated
   useEffect(() => {
@@ -64,6 +89,21 @@ export default function LoginPage() {
     }
   };
 
+  const handleDemoLogin = (demo: typeof demoCredentials[0]) => {
+    setValue('username', demo.username);
+    setValue('password', demo.password);
+    setValue('rememberMe', true);
+    
+    // Auto-submit after a short delay for better UX
+    setTimeout(() => {
+      handleSubmit(onSubmit)();
+    }, 300);
+  };
+
+  const isCurrentDemo = (demo: typeof demoCredentials[0]) => {
+    return watchedUsername === demo.username && watchedPassword === demo.password;
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 flex items-center justify-center">
@@ -92,8 +132,60 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Login Form */}
+        {/* Demo Credentials Quick Access */}
+        <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">
+            🚀 Quick Demo Login
+          </h3>
+          <div className="space-y-3">
+            {demoCredentials.map((demo, index) => (
+              <button
+                key={index}
+                onClick={() => handleDemoLogin(demo)}
+                disabled={loginMutation.isPending}
+                className={`w-full p-4 rounded-xl border-2 transition-all duration-300 transform hover:scale-105 ${
+                  isCurrentDemo(demo)
+                    ? 'border-green-400 bg-green-50 shadow-lg'
+                    : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50'
+                } ${loginMutation.isPending ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-md'}`}
+              >
+                <div className="flex items-center space-x-3">
+                  <div className={`w-10 h-10 bg-gradient-to-br ${demo.color} rounded-lg flex items-center justify-center text-white text-lg`}>
+                    {demo.icon}
+                  </div>
+                  <div className="flex-1 text-left">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-semibold text-gray-900">Login as {demo.role}</h4>
+                      {isCurrentDemo(demo) && (
+                        <span className="text-green-600 text-sm">✓ Selected</span>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-600">{demo.description}</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {demo.username} / {demo.password}
+                    </p>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+          
+          <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <p className="text-xs text-yellow-700 text-center">
+              💡 Click any option above for instant login, or use the form below for manual entry
+            </p>
+          </div>
+        </div>
+
+        {/* Manual Login Form */}
         <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+          <div className="text-center mb-6">
+            <h3 className="text-lg font-semibold text-gray-900">
+              📝 Manual Login
+            </h3>
+            <p className="text-sm text-gray-600">Or enter credentials manually</p>
+          </div>
+
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Global Error */}
             {errors.root && (
@@ -219,17 +311,6 @@ export default function LoginPage() {
               )}
             </button>
           </form>
-
-          {/* Demo Credentials */}
-          <div className="mt-8 p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
-            <h4 className="text-sm font-semibold text-yellow-800 mb-2">
-              🧪 Demo Credentials:
-            </h4>
-            <div className="text-xs text-yellow-700 space-y-1">
-              <p><strong>Admin:</strong> admin / admin123</p>
-              <p><strong>Staff:</strong> staff / staff123</p>
-            </div>
-          </div>
         </div>
 
         {/* Back to Home */}
