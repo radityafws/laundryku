@@ -67,7 +67,7 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 flex">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
       {/* Sidebar */}
       <Sidebar 
         isOpen={sidebarOpen} 
@@ -77,7 +77,9 @@ export default function DashboardLayout({
       />
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className={`min-h-screen transition-all duration-300 ${
+        sidebarCollapsed ? 'xl:ml-20' : 'xl:ml-80'
+      }`}>
         {/* Top Header */}
         <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
           <div className="px-4 sm:px-6 lg:px-8">
@@ -96,6 +98,7 @@ export default function DashboardLayout({
                 <button
                   onClick={handleToggleCollapse}
                   className="hidden xl:block p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                  title={sidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
                 >
                   <span className="text-lg">{sidebarCollapsed ? '→' : '←'}</span>
                 </button>
@@ -108,6 +111,13 @@ export default function DashboardLayout({
 
               {/* Right side */}
               <div className="flex items-center space-x-2 sm:space-x-4">
+                {/* Search */}
+                <button className="hidden md:flex items-center space-x-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-sm text-gray-600">
+                  <span>🔍</span>
+                  <span>Search...</span>
+                  <span className="text-xs bg-gray-300 px-1 rounded">Ctrl+K</span>
+                </button>
+
                 {/* Notifications */}
                 <button className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors">
                   <span className="text-lg sm:text-xl">🔔</span>
@@ -155,7 +165,7 @@ export default function DashboardLayout({
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto">
+        <main className="p-4 sm:p-6 lg:p-8">
           {children}
         </main>
       </div>
