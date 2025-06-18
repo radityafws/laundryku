@@ -65,45 +65,6 @@ export default function AdminDashboard() {
           />
         </div>
 
-        {/* Secondary Statistics Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
-          <StatsCard
-            icon="👥"
-            title="Total Pelanggan"
-            value={stats ? formatNumber(stats.totalCustomers) : 0}
-            subtitle="pelanggan"
-            color="indigo"
-            isLoading={statsLoading}
-          />
-          
-          <StatsCard
-            icon="💎"
-            title="Rata-rata Order"
-            value={stats ? formatCurrency(stats.averageOrderValue) : 'Rp 0'}
-            subtitle="per pesanan"
-            color="purple"
-            isLoading={statsLoading}
-          />
-          
-          <StatsCard
-            icon="📈"
-            title="Total Pendapatan"
-            value={stats ? formatCurrency(stats.totalRevenue) : 'Rp 0'}
-            subtitle="keseluruhan"
-            color="green"
-            isLoading={statsLoading}
-          />
-          
-          <StatsCard
-            icon="⚡"
-            title="Tingkat Penyelesaian"
-            value={stats ? `${stats.completionRate}%` : '0%'}
-            subtitle="success rate"
-            trend={{ value: 2.5, isPositive: true }}
-            color="blue"
-            isLoading={statsLoading}
-          />
-        </div>
 
         {/* Chart Section */}
         <div className="w-full">
