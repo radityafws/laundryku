@@ -28,10 +28,7 @@ interface OrdersTableProps {
 export default function OrdersTable({
   orders,
   isLoading,
-  onViewOrder,
-  onPrintReceipt,
-  onPrintOrder,
-  onUpdateStatus
+  onViewOrder
 }: OrdersTableProps) {
   const [sortField, setSortField] = useState<keyof Order>('dateIn');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
@@ -200,29 +197,12 @@ export default function OrdersTable({
                   {formatCurrency(order.total)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <div className="flex items-center space-x-2">
-                    <button
-                      onClick={() => onViewOrder(order)}
-                      className="text-blue-600 hover:text-blue-800 transition-colors"
-                      title="Lihat Detail"
-                    >
-                      👁️
-                    </button>
-                    <button
-                      onClick={() => onPrintReceipt(order)}
-                      className="text-green-600 hover:text-green-800 transition-colors"
-                      title="Cetak Struk"
-                    >
-                      🧾
-                    </button>
-                    <button
-                      onClick={() => onPrintOrder(order)}
-                      className="text-purple-600 hover:text-purple-800 transition-colors"
-                      title="Cetak Pesanan"
-                    >
-                      📋
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => onViewOrder(order)}
+                    className="bg-blue-100 text-blue-600 px-3 py-2 rounded-lg hover:bg-blue-200 transition-colors font-medium"
+                  >
+                    Detail
+                  </button>
                 </td>
               </tr>
             ))}
@@ -276,29 +256,12 @@ export default function OrdersTable({
               <div className="font-bold text-lg text-gray-900">
                 {formatCurrency(order.total)}
               </div>
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => onViewOrder(order)}
-                  className="bg-blue-100 text-blue-600 p-2 rounded-lg hover:bg-blue-200 transition-colors"
-                  title="Lihat Detail"
-                >
-                  👁️
-                </button>
-                <button
-                  onClick={() => onPrintReceipt(order)}
-                  className="bg-green-100 text-green-600 p-2 rounded-lg hover:bg-green-200 transition-colors"
-                  title="Cetak Struk"
-                >
-                  🧾
-                </button>
-                <button
-                  onClick={() => onPrintOrder(order)}
-                  className="bg-purple-100 text-purple-600 p-2 rounded-lg hover:bg-purple-200 transition-colors"
-                  title="Cetak Pesanan"
-                >
-                  📋
-                </button>
-              </div>
+              <button
+                onClick={() => onViewOrder(order)}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              >
+                Detail
+              </button>
             </div>
           </div>
         ))}
