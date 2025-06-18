@@ -13,11 +13,21 @@ export async function GET(request: NextRequest) {
 
     const token = authHeader.substring(7);
 
-    // Mock token validation (in production, verify JWT properly)
+    // Handle demo tokens
+    if (token.startsWith('demo_token_')) {
+      return NextResponse.json({
+        valid: true,
+        message: 'Demo token valid',
+        tokenType: 'demo'
+      });
+    }
+
+    // Mock token validation for production tokens (in production, verify JWT properly)
     if (token.startsWith('mock_jwt_token_')) {
       return NextResponse.json({
         valid: true,
-        message: 'Token valid'
+        message: 'Token valid',
+        tokenType: 'production'
       });
     }
 

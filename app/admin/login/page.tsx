@@ -37,6 +37,7 @@ export default function LoginPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [demoLoginStatus, setDemoLoginStatus] = useState<string | null>(null);
 
   const {
     register,
@@ -70,13 +71,21 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginFormData) => {
     try {
+      setDemoLoginStatus(null);
+      
       const credentials: LoginCredentials = {
         username: data.username,
         password: data.password,
         rememberMe: data.rememberMe,
       };
 
-      await loginMutation.mutateAsync(credentials);
+      const result = await loginMutation.mutateAsync(credentials);
+      
+      // Show demo login status if applicable
+      if (result.message?.includes('Demo login')) {
+        setDemoLoginStatus(result.message);
+      }
+      
     } catch (error: any) {
       // Handle specific field errors
       if (error.message.toLowerCase().includes('username')) {
@@ -90,6 +99,7 @@ export default function LoginPage() {
   };
 
   const handleDemoLogin = (demo: typeof demoCredentials[0]) => {
+    setDemoLoginStatus(`🚀 Logging in as ${demo.role}...`);
     setValue('username', demo.username);
     setValue('password', demo.password);
     setValue('rememberMe', true);
@@ -107,7 +117,10 @@ export default function LoginPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Checking authentication...</p>
+        </div>
       </div>
     );
   }
@@ -131,6 +144,18 @@ export default function LoginPage() {
             Masuk ke panel admin untuk mengelola pesanan laundry
           </p>
         </div>
+
+        {/* Demo Login Status */}
+        {demoLoginStatus && (
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+            <div className="flex items-center space-x-2">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+              <p className="text-blue-700 text-sm font-medium">
+                {demoLoginStatus}
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Demo Credentials Quick Access */}
         <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
@@ -172,7 +197,7 @@ export default function LoginPage() {
           
           <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
             <p className="text-xs text-yellow-700 text-center">
-              💡 Click any option above for instant login, or use the form below for manual entry
+              💡 Click any option above for instant login with mock token, or use the form below
             </p>
           </div>
         </div>

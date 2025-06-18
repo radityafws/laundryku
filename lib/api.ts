@@ -29,10 +29,15 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Clear auth data and redirect to login
-      Cookies.remove('auth_token');
-      Cookies.remove('user_data');
-      window.location.href = '/admin/login';
+      const token = Cookies.get('auth_token');
+      
+      // Don't redirect for demo tokens, they handle their own validation
+      if (!token?.startsWith('demo_token_')) {
+        // Clear auth data and redirect to login
+        Cookies.remove('auth_token');
+        Cookies.remove('user_data');
+        window.location.href = '/admin/login';
+      }
     }
     return Promise.reject(error);
   }
