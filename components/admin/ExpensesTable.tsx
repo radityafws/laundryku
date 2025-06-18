@@ -9,6 +9,7 @@ interface Expense {
   amount: number;
   date: string;
   notes?: string;
+  expenseType?: string;
 }
 
 interface ExpensesTableProps {
@@ -97,6 +98,36 @@ export default function ExpensesTable({
     }
   };
 
+  const getExpenseTypeIcon = (type: string) => {
+    switch (type) {
+      case 'monthly': return '📅';
+      case 'yearly': return '🗓️';
+      case 'one_time': return '🔄';
+      case 'routine': return '🔁';
+      default: return '📋';
+    }
+  };
+
+  const getExpenseTypeName = (type: string) => {
+    switch (type) {
+      case 'monthly': return 'Bulanan';
+      case 'yearly': return 'Tahunan';
+      case 'one_time': return 'Satu Kali';
+      case 'routine': return 'Rutin';
+      default: return 'Lainnya';
+    }
+  };
+
+  const getExpenseTypeColor = (type: string) => {
+    switch (type) {
+      case 'monthly': return 'bg-blue-100 text-blue-700 border-blue-200';
+      case 'yearly': return 'bg-green-100 text-green-700 border-green-200';
+      case 'one_time': return 'bg-gray-100 text-gray-700 border-gray-200';
+      case 'routine': return 'bg-orange-100 text-orange-700 border-orange-200';
+      default: return 'bg-purple-100 text-purple-700 border-purple-200';
+    }
+  };
+
   const startIndex = (currentPage - 1) * itemsPerPage;
 
   if (isLoading) {
@@ -105,8 +136,8 @@ export default function ExpensesTable({
         <div className="animate-pulse space-y-4">
           <div className="h-6 bg-gray-200 rounded w-1/4"></div>
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="grid grid-cols-5 gap-4">
-              {[1, 2, 3, 4, 5].map((j) => (
+            <div key={i} className="grid grid-cols-6 gap-4">
+              {[1, 2, 3, 4, 5, 6].map((j) => (
                 <div key={j} className="h-4 bg-gray-200 rounded"></div>
               ))}
             </div>
@@ -129,6 +160,7 @@ export default function ExpensesTable({
               {[
                 { key: 'date', label: 'Tanggal' },
                 { key: 'category', label: 'Kategori' },
+                { key: 'expenseType', label: 'Jenis' },
                 { key: 'description', label: 'Keterangan' },
                 { key: 'amount', label: 'Nominal' }
               ].map((column) => (
@@ -165,6 +197,12 @@ export default function ExpensesTable({
                     <span className="text-sm text-gray-900">{getCategoryName(expense.category)}</span>
                   </div>
                 </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium border ${getExpenseTypeColor(expense.expenseType || 'one_time')}`}>
+                    <span>{getExpenseTypeIcon(expense.expenseType || 'one_time')}</span>
+                    <span>{getExpenseTypeName(expense.expenseType || 'one_time')}</span>
+                  </span>
+                </td>
                 <td className="px-6 py-4">
                   <div className="text-sm text-gray-900">{expense.description}</div>
                   {expense.notes && (
@@ -195,7 +233,7 @@ export default function ExpensesTable({
           </tbody>
           <tfoot className="bg-purple-50 border-t border-purple-200">
             <tr>
-              <td colSpan={4} className="px-6 py-4 text-right font-semibold text-purple-800">
+              <td colSpan={5} className="px-6 py-4 text-right font-semibold text-purple-800">
                 Total Pengeluaran:
               </td>
               <td className="px-6 py-4 font-bold text-lg text-purple-600">
@@ -230,6 +268,15 @@ export default function ExpensesTable({
               <div>
                 <span className="text-gray-500">Tanggal:</span>
                 <div className="font-medium">{formatDate(expense.date)}</div>
+              </div>
+              <div>
+                <span className="text-gray-500">Jenis:</span>
+                <div className="mt-1">
+                  <span className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium border ${getExpenseTypeColor(expense.expenseType || 'one_time')}`}>
+                    <span>{getExpenseTypeIcon(expense.expenseType || 'one_time')}</span>
+                    <span>{getExpenseTypeName(expense.expenseType || 'one_time')}</span>
+                  </span>
+                </div>
               </div>
               <div>
                 <span className="text-gray-500">Keterangan:</span>

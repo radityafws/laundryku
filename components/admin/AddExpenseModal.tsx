@@ -14,6 +14,7 @@ interface ExpenseFormData {
   date: string;
   category: string;
   customCategory?: string;
+  expenseType: string;
   amount: number;
   description: string;
   notes?: string;
@@ -27,6 +28,14 @@ const categoryOptions = [
   { value: 'rent', label: 'Sewa', icon: '🏠' },
   { value: 'maintenance', label: 'Perawatan', icon: '🔧' },
   { value: 'other', label: 'Lainnya', icon: '📝' }
+];
+
+const expenseTypeOptions = [
+  { value: 'monthly', label: 'Bulanan', icon: '📅', description: 'Pengeluaran rutin setiap bulan' },
+  { value: 'yearly', label: 'Tahunan', icon: '🗓️', description: 'Pengeluaran rutin setiap tahun' },
+  { value: 'one_time', label: 'Satu Kali', icon: '🔄', description: 'Pengeluaran yang hanya terjadi sekali' },
+  { value: 'routine', label: 'Rutin', icon: '🔁', description: 'Pengeluaran rutin dengan periode tertentu' },
+  { value: 'other', label: 'Lainnya', icon: '📋', description: 'Jenis pengeluaran lainnya' }
 ];
 
 export default function AddExpenseModal({ isOpen, onClose }: AddExpenseModalProps) {
@@ -44,6 +53,7 @@ export default function AddExpenseModal({ isOpen, onClose }: AddExpenseModalProp
     defaultValues: {
       date: new Date().toISOString().split('T')[0],
       category: '',
+      expenseType: '',
       amount: 0,
       description: '',
       notes: ''
@@ -51,6 +61,7 @@ export default function AddExpenseModal({ isOpen, onClose }: AddExpenseModalProp
   });
 
   const watchedCategory = watch('category');
+  const watchedExpenseType = watch('expenseType');
 
   // Show custom category input when "other" is selected
   React.useEffect(() => {
@@ -229,6 +240,47 @@ export default function AddExpenseModal({ isOpen, onClose }: AddExpenseModalProp
           </div>
         )}
 
+        {/* Expense Type */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-3">
+            🔄 Jenis Pengeluaran <span className="text-red-500">*</span>
+          </label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {expenseTypeOptions.map((type) => (
+              <label
+                key={type.value}
+                className={`flex items-start space-x-3 p-4 border-2 rounded-xl cursor-pointer transition-all duration-300 ${
+                  watchedExpenseType === type.value
+                    ? 'border-blue-500 bg-blue-50'
+                    : 'border-gray-200 hover:border-blue-300'
+                }`}
+              >
+                <input
+                  {...register('expenseType', {
+                    required: 'Jenis pengeluaran wajib dipilih'
+                  })}
+                  type="radio"
+                  value={type.value}
+                  className="w-4 h-4 text-blue-600 mt-1"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center space-x-2 mb-1">
+                    <span className="text-lg">{type.icon}</span>
+                    <span className="font-medium text-gray-900">{type.label}</span>
+                  </div>
+                  <p className="text-xs text-gray-600">{type.description}</p>
+                </div>
+              </label>
+            ))}
+          </div>
+          {errors.expenseType && (
+            <p className="mt-2 text-sm text-red-600 flex items-center space-x-1">
+              <span>❌</span>
+              <span>{errors.expenseType.message}</span>
+            </p>
+          )}
+        </div>
+
         {/* Amount */}
         <div>
           <label htmlFor="amount" className="block text-sm font-semibold text-gray-700 mb-2">
@@ -339,7 +391,7 @@ export default function AddExpenseModal({ isOpen, onClose }: AddExpenseModalProp
               <ul className="text-sm text-purple-700 space-y-1">
                 <li>• Catat pengeluaran sesegera mungkin agar tidak lupa</li>
                 <li>• Gunakan keterangan yang jelas dan spesifik</li>
-                <li>• Kategori "Gaji" dapat digunakan untuk pembayaran gaji pegawai</li>
+                <li>• Pilih jenis pengeluaran sesuai dengan frekuensi kejadian</li>
                 <li>• Simpan bukti pembayaran untuk referensi</li>
               </ul>
             </div>

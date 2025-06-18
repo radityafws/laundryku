@@ -10,6 +10,7 @@ interface Expense {
   amount: number;
   date: string;
   notes?: string;
+  expenseType?: string;
 }
 
 interface EditExpenseModalProps {
@@ -22,6 +23,7 @@ interface ExpenseFormData {
   date: string;
   category: string;
   customCategory?: string;
+  expenseType: string;
   amount: number;
   description: string;
   notes?: string;
@@ -35,6 +37,14 @@ const categoryOptions = [
   { value: 'rent', label: 'Sewa', icon: '🏠' },
   { value: 'maintenance', label: 'Perawatan', icon: '🔧' },
   { value: 'other', label: 'Lainnya', icon: '📝' }
+];
+
+const expenseTypeOptions = [
+  { value: 'monthly', label: 'Bulanan', icon: '📅', description: 'Pengeluaran rutin setiap bulan' },
+  { value: 'yearly', label: 'Tahunan', icon: '🗓️', description: 'Pengeluaran rutin setiap tahun' },
+  { value: 'one_time', label: 'Satu Kali', icon: '🔄', description: 'Pengeluaran yang hanya terjadi sekali' },
+  { value: 'routine', label: 'Rutin', icon: '🔁', description: 'Pengeluaran rutin dengan periode tertentu' },
+  { value: 'other', label: 'Lainnya', icon: '📋', description: 'Jenis pengeluaran lainnya' }
 ];
 
 export default function EditExpenseModal({ expense, isOpen, onClose }: EditExpenseModalProps) {
@@ -51,6 +61,7 @@ export default function EditExpenseModal({ expense, isOpen, onClose }: EditExpen
   } = useForm<ExpenseFormData>();
 
   const watchedCategory = watch('category');
+  const watchedExpenseType = watch('expenseType');
 
   // Set initial values when expense changes
   useEffect(() => {
@@ -60,6 +71,7 @@ export default function EditExpenseModal({ expense, isOpen, onClose }: EditExpen
       setValue('date', expense.date);
       setValue('category', isCustomCategory ? 'other' : expense.category);
       setValue('customCategory', isCustomCategory ? expense.category : '');
+      setValue('expenseType', expense.expenseType || 'one_time'); // Default to 'one_time' if not set
       setValue('amount', expense.amount);
       setValue('description', expense.description);
       setValue('notes', expense.notes || '');
@@ -160,6 +172,11 @@ export default function EditExpenseModal({ expense, isOpen, onClose }: EditExpen
     }).format(amount);
   };
 
+  const getExpenseTypeName = (type: string) => {
+    const option = expenseTypeOptions.find(opt => opt.value === type);
+    return option ? option.label : type;
+  };
+
   return (
     <Modal isOpen={isOpen} onClose={handleClose} size="lg">
       {/* Header */}
@@ -191,6 +208,12 @@ export default function EditExpenseModal({ expense, isOpen, onClose }: EditExpen
               </div>
             </div>
             <div>
+              <span className="text-purple-600">Jenis:</span>
+              <div className="font-semibold text-purple-900">
+                {getExpenseTypeName(expense.expenseType || 'one_time')}
+              </div>
+            </div>
+            <div className="md:col-span-3">
               <span className="text-purple-600">Nominal:</span>
               <div className="font-semibold text-purple-900">
                 {formatCurrencyDisplay(expense.amount)}
@@ -287,6 +310,47 @@ export default function EditExpenseModal({ expense, isOpen, onClose }: EditExpen
               )}
             </div>
           )}
+
+          {/* Expense Type */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-3">
+              🔄 Jenis Pengeluaran <span className="text-red-500">*</span>
+            </label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {expenseTypeOptions.map((type) => (
+                <label
+                  key={type.value}
+                  className={`flex items-start space-x-3 p-4 border-2 rounded-xl cursor-pointer transition-all duration-300 ${
+                    watchedExpenseType === type.value
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-200 hover:border-blue-300'
+                  }`}
+                >
+                  <input
+                    {...register('expenseType', {
+                      required: 'Jenis pengeluaran wajib dipilih'
+                    })}
+                    type="radio"
+                    value={type.value}
+                    className="w-4 h-4 text-blue-600 mt-1"
+                  />
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2 mb-1">
+                      <span className="text-lg">{type.icon}</span>
+                      <span className="font-medium text-gray-900">{type.label}</span>
+                    </div>
+                    <p className="text-xs text-gray-600">{type.description}</p>
+                  </div>
+                </label>
+              ))}
+            </div>
+            {errors.expenseType && (
+              <p className="mt-2 text-sm text-red-600 flex items-center space-x-1">
+                <span>❌</span>
+                <span>{errors.expenseType.message}</span>
+              </p>
+            )}
+          </div>
 
           {/* Amount */}
           <div>
