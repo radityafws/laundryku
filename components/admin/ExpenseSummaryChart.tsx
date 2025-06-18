@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Chart as ChartJS,
   ArcElement,
@@ -67,6 +67,7 @@ export default function ExpenseSummaryChart({
   isLoading = false 
 }: ExpenseSummaryChartProps) {
   const chartRef = useRef<ChartJS>(null);
+  const [isCollapsed, setIsCollapsed] = useState(true); // Default collapsed
 
   // Group expenses by category
   const categoryTotals = expenses.reduce((acc, expense) => {
@@ -178,6 +179,10 @@ export default function ExpenseSummaryChart({
     }).format(amount);
   };
 
+  const toggleCollapse = () => {
+    setIsCollapsed(!isCollapsed);
+  };
+
   if (isLoading) {
     return (
       <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-lg border border-gray-100">
@@ -215,78 +220,160 @@ export default function ExpenseSummaryChart({
   );
 
   return (
-    <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-lg border border-gray-100">
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Pie Chart */}
-        <div className="lg:col-span-2">
-          <div className="h-64 sm:h-80">
-            <Pie ref={chartRef} data={data} options={options} />
+    <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+      {/* Header with Collapse Toggle */}
+      <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-blue-50">
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+            <span className="text-xl">📊</span>
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-gray-900">Ringkasan Pengeluaran</h3>
+            <p className="text-sm text-gray-600">Distribusi pengeluaran per kategori</p>
           </div>
         </div>
+        
+        <button
+          onClick={toggleCollapse}
+          className="flex items-center space-x-2 px-4 py-2 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg transition-all duration-300 shadow-sm hover:shadow-md"
+        >
+          <span className="text-sm font-medium text-gray-700">
+            {isCollapsed ? 'Tampilkan Detail' : 'Sembunyikan Detail'}
+          </span>
+          <span className={`text-gray-500 transition-transform duration-300 ${
+            isCollapsed ? 'rotate-0' : 'rotate-180'
+          }`}>
+            ▼
+          </span>
+        </button>
+      </div>
 
-        {/* Category Breakdown */}
-        <div className="space-y-4">
-          <h4 className="text-lg font-semibold text-gray-900 mb-4">📋 Detail per Kategori</h4>
-          <div className="space-y-3 max-h-64 overflow-y-auto">
-            {Object.entries(categoryTotals)
-              .sort(([,a], [,b]) => b - a) // Sort by amount descending
-              .map(([category, amount]) => {
-                const percentage = ((amount / totalAmount) * 100).toFixed(1);
-                const label = categoryLabels[category] || category;
-                const icon = categoryIcons[category] || categoryIcons.other;
-                const color = categoryColors[category] || categoryColors.other;
-                
-                return (
-                  <div key={category} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <div 
-                        className="w-4 h-4 rounded-full"
-                        style={{ backgroundColor: color }}
-                      ></div>
-                      <span className="text-lg">{icon}</span>
-                      <div>
-                        <p className="font-medium text-gray-900 text-sm">{label}</p>
-                        <p className="text-xs text-gray-600">{percentage}%</p>
+      {/* Collapsible Content */}
+      <div className={`transition-all duration-500 ease-in-out overflow-hidden ${
+        isCollapsed ? 'max-h-0' : 'max-h-[1000px]'
+      }`}>
+        <div className="p-4 sm:p-6">
+          <div className="grid lg:grid-cols-3 gap-6">
+            {/* Pie Chart */}
+            <div className="lg:col-span-2">
+              <div className="h-64 sm:h-80">
+                <Pie ref={chartRef} data={data} options={options} />
+              </div>
+            </div>
+
+            {/* Category Breakdown */}
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2 mb-4">
+                <span className="text-lg">📋</span>
+                <h4 className="text-lg font-semibold text-gray-900">Detail per Kategori</h4>
+              </div>
+              
+              <div className="space-y-3 max-h-64 overflow-y-auto">
+                {Object.entries(categoryTotals)
+                  .sort(([,a], [,b]) => b - a) // Sort by amount descending
+                  .map(([category, amount]) => {
+                    const percentage = ((amount / totalAmount) * 100).toFixed(1);
+                    const label = categoryLabels[category] || category;
+                    const icon = categoryIcons[category] || categoryIcons.other;
+                    const color = categoryColors[category] || categoryColors.other;
+                    
+                    return (
+                      <div key={category} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                        <div className="flex items-center space-x-3">
+                          <div 
+                            className="w-4 h-4 rounded-full shadow-sm"
+                            style={{ backgroundColor: color }}
+                          ></div>
+                          <span className="text-lg">{icon}</span>
+                          <div>
+                            <p className="font-medium text-gray-900 text-sm">{label}</p>
+                            <p className="text-xs text-gray-600">{percentage}%</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-semibold text-gray-900 text-sm">
+                            {formatCurrency(amount)}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-gray-900 text-sm">
-                        {formatCurrency(amount)}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
+                    );
+                  })}
+              </div>
+            </div>
+          </div>
+          
+          {/* Summary Stats */}
+          <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-gray-200">
+            <div className="text-center p-3 bg-purple-50 rounded-lg">
+              <div className="flex items-center justify-center space-x-1 mb-1">
+                <span className="text-lg">🏷️</span>
+                <p className="text-sm font-medium text-purple-600">Total Kategori</p>
+              </div>
+              <p className="text-xl font-bold text-purple-700">{Object.keys(categoryTotals).length}</p>
+            </div>
+            
+            <div className="text-center p-3 bg-blue-50 rounded-lg">
+              <div className="flex items-center justify-center space-x-1 mb-1">
+                <span className="text-lg">📝</span>
+                <p className="text-sm font-medium text-blue-600">Total Transaksi</p>
+              </div>
+              <p className="text-xl font-bold text-blue-700">{expenses.length}</p>
+            </div>
+            
+            <div className="text-center p-3 bg-green-50 rounded-lg">
+              <div className="flex items-center justify-center space-x-1 mb-1">
+                <span className="text-lg">🏆</span>
+                <p className="text-sm font-medium text-green-600">Kategori Terbesar</p>
+              </div>
+              <div className="flex items-center justify-center space-x-1">
+                <span className="text-sm">{categoryIcons[highestCategory[0]]}</span>
+                <p className="text-sm font-bold text-green-700">
+                  {categoryLabels[highestCategory[0]] || highestCategory[0]}
+                </p>
+              </div>
+            </div>
+            
+            <div className="text-center p-3 bg-orange-50 rounded-lg">
+              <div className="flex items-center justify-center space-x-1 mb-1">
+                <span className="text-lg">📊</span>
+                <p className="text-sm font-medium text-orange-600">Rata-rata per Kategori</p>
+              </div>
+              <p className="text-sm font-bold text-orange-700">
+                {formatCurrency(totalAmount / Object.keys(categoryTotals).length)}
+              </p>
+            </div>
           </div>
         </div>
       </div>
-      
-      {/* Summary Stats */}
-      <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-gray-200">
-        <div className="text-center">
-          <p className="text-sm text-gray-600">Total Kategori</p>
-          <p className="text-lg font-bold text-purple-600">{Object.keys(categoryTotals).length}</p>
-        </div>
-        <div className="text-center">
-          <p className="text-sm text-gray-600">Total Transaksi</p>
-          <p className="text-lg font-bold text-blue-600">{expenses.length}</p>
-        </div>
-        <div className="text-center">
-          <p className="text-sm text-gray-600">Kategori Terbesar</p>
-          <div className="flex items-center justify-center space-x-1">
-            <span className="text-sm">{categoryIcons[highestCategory[0]]}</span>
-            <p className="text-sm font-bold text-green-600">
-              {categoryLabels[highestCategory[0]] || highestCategory[0]}
-            </p>
+
+      {/* Always Visible Summary (when collapsed) */}
+      {isCollapsed && (
+        <div className="px-4 sm:px-6 pb-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="text-center p-2 bg-gray-50 rounded-lg">
+              <p className="text-xs text-gray-600">Kategori</p>
+              <p className="text-lg font-bold text-purple-600">{Object.keys(categoryTotals).length}</p>
+            </div>
+            <div className="text-center p-2 bg-gray-50 rounded-lg">
+              <p className="text-xs text-gray-600">Transaksi</p>
+              <p className="text-lg font-bold text-blue-600">{expenses.length}</p>
+            </div>
+            <div className="text-center p-2 bg-gray-50 rounded-lg">
+              <p className="text-xs text-gray-600">Total</p>
+              <p className="text-sm font-bold text-red-600">{formatCurrency(totalAmount)}</p>
+            </div>
+            <div className="text-center p-2 bg-gray-50 rounded-lg">
+              <p className="text-xs text-gray-600">Terbesar</p>
+              <div className="flex items-center justify-center space-x-1">
+                <span className="text-xs">{categoryIcons[highestCategory[0]]}</span>
+                <p className="text-xs font-bold text-green-600">
+                  {(categoryLabels[highestCategory[0]] || highestCategory[0]).substring(0, 8)}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
-        <div className="text-center">
-          <p className="text-sm text-gray-600">Rata-rata per Kategori</p>
-          <p className="text-lg font-bold text-red-600">
-            {formatCurrency(totalAmount / Object.keys(categoryTotals).length)}
-          </p>
-        </div>
-      </div>
+      )}
     </div>
   );
 }
