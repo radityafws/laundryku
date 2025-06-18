@@ -111,12 +111,6 @@ export default function DashboardLayout({
 
               {/* Right side */}
               <div className="flex items-center space-x-2 sm:space-x-4">
-                {/* Search */}
-                <button className="hidden md:flex items-center space-x-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-sm text-gray-600">
-                  <span>🔍</span>
-                  <span>Search...</span>
-                  <span className="text-xs bg-gray-300 px-1 rounded">Ctrl+K</span>
-                </button>
 
                 {/* User Menu */}
                 <div className="flex items-center space-x-2 sm:space-x-3">
