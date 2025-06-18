@@ -334,8 +334,8 @@ Terima kasih telah menggunakan layanan LaundryKilat!`
                 <div className="mt-2 bg-blue-50 border border-blue-200 rounded-lg p-3">
                   <h4 className="font-semibold text-blue-800 mb-2">📋 Placeholder yang Tersedia:</h4>
                   <div className="grid grid-cols-2 gap-2 text-sm text-blue-700">
-                    <div><code className="bg-blue-100 px-1 rounded">{{`{no_hp}`}}</code> - Nomor tujuan</div>
-                    <div><code className="bg-blue-100 px-1 rounded">{{`{message}`}}</code> - Isi pesan</div>
+                    <div><code className="bg-blue-100 px-1 rounded">{'{{no_hp}}'}</code> - Nomor tujuan</div>
+                    <div><code className="bg-blue-100 px-1 rounded">{'{{message}}'}</code> - Isi pesan</div>
                   </div>
                 </div>
               </div>
@@ -368,10 +368,10 @@ Terima kasih telah menggunakan layanan LaundryKilat!`
                 <div className="mt-2 bg-green-50 border border-green-200 rounded-lg p-3">
                   <h4 className="font-semibold text-green-800 mb-2">📋 Placeholder yang Tersedia:</h4>
                   <div className="grid grid-cols-2 gap-2 text-sm text-green-700">
-                    <div><code className="bg-green-100 px-1 rounded">{{`{nama}`}}</code> - Nama pelanggan</div>
-                    <div><code className="bg-green-100 px-1 rounded">{{`{invoice}`}}</code> - Nomor invoice</div>
-                    <div><code className="bg-green-100 px-1 rounded">{{`{status}`}}</code> - Status pesanan</div>
-                    <div><code className="bg-green-100 px-1 rounded">{{`{estimasi_selesai}`}}</code> - Estimasi selesai</div>
+                    <div><code className="bg-green-100 px-1 rounded">{'{{nama}}'}</code> - Nama pelanggan</div>
+                    <div><code className="bg-green-100 px-1 rounded">{'{{invoice}}'}</code> - Nomor invoice</div>
+                    <div><code className="bg-green-100 px-1 rounded">{'{{status}}'}</code> - Status pesanan</div>
+                    <div><code className="bg-green-100 px-1 rounded">{'{{estimasi_selesai}}'}</code> - Estimasi selesai</div>
                   </div>
                 </div>
               </div>
