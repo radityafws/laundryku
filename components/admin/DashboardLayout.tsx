@@ -118,7 +118,6 @@ export default function DashboardLayout({
                   <span className="text-xs bg-gray-300 px-1 rounded">Ctrl+K</span>
                 </button>
 
-
                 {/* User Menu */}
                 <div className="flex items-center space-x-2 sm:space-x-3">
                   <div className="text-right hidden md:block">
