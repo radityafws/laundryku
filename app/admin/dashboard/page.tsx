@@ -66,9 +66,9 @@ export default function AdminDashboard() {
         </div>
 
         {/* Chart Section */}
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1">
           {/* Main Chart */}
-          <div className="lg:col-span-2">
+          <div className="col-span-1">
             <DashboardChart
               labels={chartData?.labels || []}
               orderData={chartData?.orderData || []}
@@ -76,38 +76,6 @@ export default function AdminDashboard() {
               isLoading={chartLoading}
             />
           </div>
-
-          {/* Quick Stats */}
-          <div className="space-y-6">
-            <StatsCard
-              icon="👥"
-              title="Total Pelanggan"
-              value={stats ? formatNumber(stats.totalCustomers) : 0}
-              subtitle="terdaftar"
-              color="indigo"
-              isLoading={statsLoading}
-            />
-            
-            <StatsCard
-              icon="📊"
-              title="Rata-rata Nilai Pesanan"
-              value={stats ? formatCurrency(stats.averageOrderValue) : 'Rp 0'}
-              color="green"
-              isLoading={statsLoading}
-            />
-            
-            <StatsCard
-              icon="🎯"
-              title="Tingkat Penyelesaian"
-              value={stats ? `${stats.completionRate}%` : '0%'}
-              subtitle="success rate"
-              trend={{ value: 2, isPositive: true }}
-              color="blue"
-              isLoading={statsLoading}
-            />
-          </div>
-        </div>
-
      
       </div>
     </DashboardLayout>
