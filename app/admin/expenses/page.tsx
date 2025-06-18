@@ -1,15 +1,21 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import DashboardLayout from '@/components/admin/DashboardLayout';
 import ExpensesTable from '@/components/admin/ExpensesTable';
 import AddExpenseModal from '@/components/admin/AddExpenseModal';
 import EditExpenseModal from '@/components/admin/EditExpenseModal';
-import ExpenseSummaryChart from '@/components/admin/ExpenseSummaryChart';
 import DateRangePicker from '@/components/ui/DateRangePicker';
 import { useExpenses } from '@/hooks/useExpenses';
 import { useDebounce } from '@/hooks/useDebounce';
 import { toast } from 'react-toastify';
+
+// Dynamically import ExpenseSummaryChart with SSR disabled
+const ExpenseSummaryChart = dynamic(
+  () => import('@/components/admin/ExpenseSummaryChart'),
+  { ssr: false }
+);
 
 export default function ExpensesPage() {
   const [showAddModal, setShowAddModal] = useState(false);
