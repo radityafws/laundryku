@@ -54,9 +54,9 @@
   "about": {
     "title": {
       "main": "Tentang",
-      "highlight": "LaundryKilat"
+      "highlight": "MamaYuni Laundry"
     },
-    "description": "LaundryKilat adalah layanan laundry kiloan terpercaya yang telah melayani lebih dari 5.000 pelanggan sejak 2019. Kami berkomitmen memberikan layanan cepat, bersih, dan terjangkau bagi setiap pelanggan kami.",
+    "description": "MamaYuni Laundry adalah layanan laundry kiloan terpercaya yang telah melayani lebih dari 5.000 pelanggan sejak 2019. Kami berkomitmen memberikan layanan cepat, bersih, dan terjangkau bagi setiap pelanggan kami.",
     "location": {
       "icon": "📍",
       "title": "Berlokasi di Solo",
@@ -92,7 +92,7 @@
   "features": {
     "title": {
       "main": "Mengapa Pilih",
-      "highlight": "LaundryKilat?"
+      "highlight": "MamaYuni Laundry?"
     },
     "subtitle": "Kami memberikan pelayanan terbaik dengan standar kualitas tinggi untuk kepuasan Anda",
     "items": [
@@ -142,7 +142,7 @@
   "contact": {
     "title": {
       "main": "Hubungi",
-      "highlight": "LaundryKilat"
+      "highlight": "MamaYuni Laundry"
     },
     "subtitle": "Siap melayani kebutuhan laundry Anda dengan pelayanan terbaik",
     "info": [
@@ -168,16 +168,16 @@
       {
         "icon": "📧",
         "title": "Email",
-        "content": "support@laundrykilat.id",
+        "content": "support@MamaYuni Laundry.id",
         "gradient": "from-purple-500 to-purple-600",
-        "link": "mailto:support@laundrykilat.id"
+        "link": "mailto:support@MamaYuni Laundry.id"
       },
       {
         "icon": "🌐",
         "title": "Instagram",
-        "content": "@laundrykilat.solo",
+        "content": "@MamaYuni Laundry.solo",
         "gradient": "from-pink-500 to-pink-600",
-        "link": "https://instagram.com/laundrykilat.solo"
+        "link": "https://instagram.com/MamaYuni Laundry.solo"
       }
     ],
     "cta": {
@@ -203,7 +203,7 @@
   },
   "footer": {
     "brand": {
-      "name": "LaundryKilat",
+      "name": "MamaYuni Laundry",
       "logo": "🧺",
       "description": "Layanan laundry kiloan terpercaya dengan kualitas terbaik dan harga terjangkau."
     },
@@ -230,8 +230,8 @@
         "title": "Kontak",
         "items": [
           "📱 0812-3456-7890",
-          "📧 support@laundrykilat.id",
-          "🌐 @laundrykilat.solo"
+          "📧 support@MamaYuni Laundry.id",
+          "🌐 @MamaYuni Laundry.solo"
         ]
       }
     ],
@@ -240,7 +240,7 @@
   "navigation": {
     "logo": {
       "icon": "🧺",
-      "text": "LaundryKilat"
+      "text": "MamaYuni Laundry"
     },
     "menu": [
       { "text": "Home", "link": "/" },
