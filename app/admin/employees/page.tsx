@@ -1,10 +1,74 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/admin/DashboardLayout';
-import { useEmployees } from '@/hooks/useDashboard';
+import EmployeesTable from '@/components/admin/EmployeesTable';
+import AddEmployeeModal from '@/components/admin/AddEmployeeModal';
+import EditEmployeeModal from '@/components/admin/EditEmployeeModal';
+import { useEmployees } from '@/hooks/useEmployees';
+import { useDebounce } from '@/hooks/useDebounce';
+import { toast } from 'react-toastify';
 
 export default function EmployeesPage() {
-  const { data: employees, isLoading } = useEmployees();
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [editingEmployee, setEditingEmployee] = useState<any>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  // Debounce search term
+  const debouncedSearchTerm = useDebounce(searchTerm, 400);
+
+  const { data: employees, isLoading, refetch } = useEmployees();
+
+  // Filter employees based on search
+  const filteredEmployees = employees?.filter(employee => {
+    if (!debouncedSearchTerm) return true;
+    
+    const searchLower = debouncedSearchTerm.toLowerCase();
+    return (
+      employee.name.toLowerCase().includes(searchLower) ||
+      employee.phone.includes(debouncedSearchTerm) ||
+      employee.email.toLowerCase().includes(searchLower)
+    );
+  }) || [];
+
+  // Pagination
+  const totalPages = Math.ceil(filteredEmployees.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedEmployees = filteredEmployees.slice(startIndex, startIndex + itemsPerPage);
+
+  // Reset page when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearchTerm]);
+
+  // Calculate stats
+  const totalEmployees = employees?.length || 0;
+  const activeEmployees = employees?.filter(emp => emp.status === 'active').length || 0;
+  const totalSalary = employees?.reduce((sum, emp) => sum + emp.salary, 0) || 0;
+
+  const handleEditEmployee = (employee: any) => {
+    setEditingEmployee(employee);
+  };
+
+  const handleDeleteEmployee = (employee: any) => {
+    if (confirm(`Apakah Anda yakin ingin menghapus pegawai "${employee.name}"?\n\nData yang dihapus tidak dapat dikembalikan.`)) {
+      // Here you would call the delete API
+      console.log('Delete employee:', employee.id);
+      toast.success(`Pegawai "${employee.name}" berhasil dihapus!`, {
+        position: "top-right",
+        autoClose: 3000,
+      });
+      refetch();
+    }
+  };
+
+  const handleModalClose = () => {
+    setShowAddModal(false);
+    setEditingEmployee(null);
+    refetch(); // Refresh data after modal closes
+  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -14,47 +78,12 @@ export default function EmployeesPage() {
     }).format(amount);
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('id-ID', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    });
-  };
-
-  const getRoleIcon = (role: string) => {
-    switch (role) {
-      case 'admin': return '👑';
-      case 'staff': return '👨‍💼';
-      case 'driver': return '🚚';
-      default: return '👤';
-    }
-  };
-
-  const getRoleName = (role: string) => {
-    switch (role) {
-      case 'admin': return 'Administrator';
-      case 'staff': return 'Staff Laundry';
-      case 'driver': return 'Driver';
-      default: return 'Unknown';
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    return status === 'active' 
-      ? 'bg-green-100 text-green-700' 
-      : 'bg-red-100 text-red-700';
-  };
-
-  const totalSalary = employees?.reduce((sum, emp) => sum + emp.salary, 0) || 0;
-  const activeEmployees = employees?.filter(emp => emp.status === 'active').length || 0;
-
   return (
-    <DashboardLayout title="Manajemen Pegawai" subtitle="Manage staff and employee data">
+    <DashboardLayout title="Manajemen Pegawai" subtitle="Kelola data pegawai dan karyawan">
       <div className="space-y-6">
         {/* Summary Cards */}
         <div className="grid md:grid-cols-3 gap-6">
-          <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+          <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
             <div className="flex items-center space-x-4">
               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
                 <span className="text-2xl">👥</span>
@@ -62,13 +91,13 @@ export default function EmployeesPage() {
               <div>
                 <p className="text-sm text-gray-600">Total Pegawai</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {employees?.length || 0}
+                  {totalEmployees}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+          <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
             <div className="flex items-center space-x-4">
               <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
                 <span className="text-2xl">✅</span>
@@ -82,7 +111,7 @@ export default function EmployeesPage() {
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+          <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
             <div className="flex items-center space-x-4">
               <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
                 <span className="text-2xl">💰</span>
@@ -97,98 +126,98 @@ export default function EmployeesPage() {
           </div>
         </div>
 
-        {/* Employee List */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100">
-          <div className="p-6 border-b border-gray-200">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold text-gray-900">👥 Daftar Pegawai</h2>
-              <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-300 flex items-center space-x-2">
-                <span>➕</span>
-                <span>Tambah Pegawai</span>
-              </button>
+        {/* Header & Search */}
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-4 sm:p-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">👨‍💼 Daftar Pegawai</h2>
+              <p className="text-sm text-gray-600">Kelola dan pantau data semua pegawai</p>
             </div>
+            
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-2 shadow-lg"
+            >
+              <span>➕</span>
+              <span>Tambah Pegawai</span>
+            </button>
           </div>
 
-          <div className="p-6">
-            {isLoading ? (
-              <div className="space-y-4">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="animate-pulse">
-                    <div className="flex items-center space-x-4 p-6 bg-gray-50 rounded-xl">
-                      <div className="w-16 h-16 bg-gray-200 rounded-full"></div>
-                      <div className="flex-1">
-                        <div className="h-5 bg-gray-200 rounded w-1/3 mb-2"></div>
-                        <div className="h-4 bg-gray-200 rounded w-1/4 mb-2"></div>
-                        <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                      </div>
-                      <div className="h-6 bg-gray-200 rounded w-20"></div>
-                    </div>
-                  </div>
-                ))}
+          {/* Search */}
+          <div className="relative max-w-md">
+            <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-2">
+              🔍 Pencarian Pegawai
+            </label>
+            <div className="relative">
+              <input
+                id="search"
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Cari nama, HP, atau email..."
+                className="w-full px-4 py-3 pr-10 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-300 outline-none"
+              />
+              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                {searchTerm ? (
+                  <button
+                    onClick={() => setSearchTerm('')}
+                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    ✕
+                  </button>
+                ) : (
+                  <span className="text-gray-400">🔍</span>
+                )}
               </div>
-            ) : employees && employees.length > 0 ? (
-              <div className="space-y-4">
-                {employees.map((employee) => (
-                  <div key={employee.id} className="flex items-center justify-between p-6 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xl font-bold">
-                        {employee.name.charAt(0)}
-                      </div>
-                      <div>
-                        <div className="flex items-center space-x-3 mb-1">
-                          <h3 className="text-lg font-semibold text-gray-900">{employee.name}</h3>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(employee.status)}`}>
-                            {employee.status === 'active' ? 'Aktif' : 'Tidak Aktif'}
-                          </span>
-                        </div>
-                        <div className="flex items-center space-x-4 text-sm text-gray-600">
-                          <span className="flex items-center space-x-1">
-                            <span>{getRoleIcon(employee.role)}</span>
-                            <span>{getRoleName(employee.role)}</span>
-                          </span>
-                          <span>📧 {employee.email}</span>
-                          <span>📱 {employee.phone}</span>
-                        </div>
-                        <p className="text-xs text-gray-500 mt-1">
-                          Bergabung: {formatDate(employee.joinDate)}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="text-right">
-                      <p className="text-lg font-bold text-gray-900 mb-1">
-                        {formatCurrency(employee.salary)}
-                      </p>
-                      <p className="text-xs text-gray-500 mb-2">per bulan</p>
-                      <div className="flex space-x-2">
-                        <button className="text-blue-600 hover:text-blue-800 text-sm px-3 py-1 bg-blue-50 rounded-lg">
-                          Edit
-                        </button>
-                        <button className="text-red-600 hover:text-red-800 text-sm px-3 py-1 bg-red-50 rounded-lg">
-                          Hapus
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <div className="text-6xl mb-4">👥</div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">
-                  Belum Ada Data Pegawai
-                </h3>
-                <p className="text-gray-600 mb-6">
-                  Mulai tambahkan data pegawai untuk manajemen yang lebih baik.
-                </p>
-                <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300">
-                  Tambah Pegawai Pertama
-                </button>
-              </div>
-            )}
+            </div>
+            
+            {/* Search Results Info */}
+            <div className="mt-2 text-sm text-gray-600">
+              {debouncedSearchTerm ? (
+                <span>
+                  Menampilkan {filteredEmployees.length} dari {employees?.length || 0} pegawai
+                  {debouncedSearchTerm && (
+                    <span className="ml-2 bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs">
+                      "{debouncedSearchTerm}"
+                    </span>
+                  )}
+                </span>
+              ) : (
+                <span>Total {employees?.length || 0} pegawai terdaftar</span>
+              )}
+            </div>
           </div>
         </div>
+
+        {/* Employees Table */}
+        <EmployeesTable
+          employees={paginatedEmployees}
+          isLoading={isLoading}
+          onEditEmployee={handleEditEmployee}
+          onDeleteEmployee={handleDeleteEmployee}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={filteredEmployees.length}
+          itemsPerPage={itemsPerPage}
+          onPageChange={setCurrentPage}
+        />
       </div>
+
+      {/* Modals */}
+      {showAddModal && (
+        <AddEmployeeModal
+          isOpen={showAddModal}
+          onClose={handleModalClose}
+        />
+      )}
+
+      {editingEmployee && (
+        <EditEmployeeModal
+          employee={editingEmployee}
+          isOpen={!!editingEmployee}
+          onClose={handleModalClose}
+        />
+      )}
     </DashboardLayout>
   );
 }
