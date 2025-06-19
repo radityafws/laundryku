@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Modal from '@/components/ui/Modal';
+import { OrderStatus } from '@/lib/order-status-api';
 
 interface Order {
   id: string;
@@ -10,12 +11,12 @@ interface Order {
   customerPhone: string;
   dateIn: string;
   estimatedDone: string;
-  weight: number;
-  service: 'regular' | 'express';
-  status: 'in-progress' | 'ready' | 'completed';
+  items: any[];
+  status: string;
+  paymentStatus: 'paid' | 'unpaid';
   total: number;
   notes?: string;
-  paymentMethod?: 'cash' | 'qris';
+  paymentMethod?: 'cash' | 'qris' | 'transfer';
 }
 
 interface OrderDetailModalProps {
@@ -25,13 +26,9 @@ interface OrderDetailModalProps {
   onPrintReceipt: (order: Order) => void;
   onPrintOrder: (order: Order) => void;
   onUpdateStatus: (order: Order, newStatus: string) => void;
+  onUpdatePaymentStatus: (order: Order, newStatus: string) => void;
+  orderStatuses?: OrderStatus[];
 }
-
-const statusOptions = [
-  { value: 'in-progress', label: 'Dalam Proses', icon: '🔄', color: 'yellow' },
-  { value: 'ready', label: 'Siap Diambil', icon: '✅', color: 'green' },
-  { value: 'completed', label: 'Sudah Diambil', icon: '✔️', color: 'gray' }
-];
 
 export default function OrderDetailModal({
   order,
@@ -39,10 +36,14 @@ export default function OrderDetailModal({
   onClose,
   onPrintReceipt,
   onPrintOrder,
-  onUpdateStatus
+  onUpdateStatus,
+  onUpdatePaymentStatus,
+  orderStatuses = []
 }: OrderDetailModalProps) {
   const [showStatusUpdate, setShowStatusUpdate] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState(order.status);
+  const [showPaymentStatusUpdate, setShowPaymentStatusUpdate] = useState(false);
+  const [selectedPaymentStatus, setSelectedPaymentStatus] = useState(order.paymentStatus);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -61,20 +62,70 @@ export default function OrderDetailModal({
     });
   };
 
-  const getStatusInfo = (status: string) => {
-    return statusOptions.find(s => s.value === status) || statusOptions[0];
+  const getStatusInfo = (statusId: string) => {
+    const status = orderStatuses.find(s => s.id === statusId);
+    return {
+      icon: status?.icon || '❓',
+      name: status?.name || 'Unknown',
+      color: getStatusColor(statusId)
+    };
   };
 
-  const getServiceInfo = (service: string) => {
-    return service === 'express' 
-      ? { label: 'Express (1 hari)', icon: '⚡', price: 5000 }
-      : { label: 'Reguler (3 hari)', icon: '🕐', price: 3000 };
+  const getStatusColor = (statusId: string) => {
+    const status = orderStatuses.find(s => s.id === statusId);
+    if (!status) return 'bg-gray-100 text-gray-700 border-gray-200';
+    
+    // Map status to colors based on order or predefined values
+    const order = status.order || 0;
+    
+    if (status.name.toLowerCase().includes('batal') || status.icon === '❌') {
+      return 'bg-red-100 text-red-700 border-red-200';
+    }
+    
+    if (status.name.toLowerCase().includes('selesai') || status.icon === '✅') {
+      return 'bg-green-100 text-green-700 border-green-200';
+    }
+    
+    if (status.name.toLowerCase().includes('siap') || status.icon === '🚚') {
+      return 'bg-blue-100 text-blue-700 border-blue-200';
+    }
+    
+    // Default colors based on order
+    if (order <= 2) return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+    if (order <= 4) return 'bg-blue-100 text-blue-700 border-blue-200';
+    return 'bg-purple-100 text-purple-700 border-purple-200';
   };
 
-  const getPaymentMethodInfo = (method: string) => {
-    return method === 'qris'
-      ? { label: 'QRIS', icon: '📱' }
-      : { label: 'Tunai', icon: '💵' };
+  const getPaymentStatusColor = (status: string) => {
+    return status === 'paid' 
+      ? 'bg-green-100 text-green-700 border-green-200' 
+      : 'bg-yellow-100 text-yellow-700 border-yellow-200';
+  };
+
+  const getPaymentStatusText = (status: string) => {
+    return status === 'paid' ? 'Sudah Dibayar' : 'Belum Dibayar';
+  };
+
+  const getPaymentStatusIcon = (status: string) => {
+    return status === 'paid' ? '✅' : '⏳';
+  };
+
+  const getPaymentMethodIcon = (method?: string) => {
+    switch (method) {
+      case 'cash': return '💵';
+      case 'qris': return '📱';
+      case 'transfer': return '🏦';
+      default: return '💰';
+    }
+  };
+
+  const getPaymentMethodText = (method?: string) => {
+    switch (method) {
+      case 'cash': return 'Tunai';
+      case 'qris': return 'QRIS';
+      case 'transfer': return 'Transfer';
+      default: return 'Tidak diketahui';
+    }
   };
 
   const handleStatusUpdate = () => {
@@ -82,9 +133,16 @@ export default function OrderDetailModal({
     setShowStatusUpdate(false);
   };
 
+  const handlePaymentStatusUpdate = () => {
+    onUpdatePaymentStatus(order, selectedPaymentStatus);
+    setShowPaymentStatusUpdate(false);
+  };
+
   const statusInfo = getStatusInfo(order.status);
-  const serviceInfo = getServiceInfo(order.service);
-  const paymentInfo = getPaymentMethodInfo(order.paymentMethod || 'cash');
+
+  // Group items by type
+  const serviceItems = order.items?.filter(item => item.type === 'service') || [];
+  const productItems = order.items?.filter(item => item.type === 'product') || [];
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="xl">
@@ -98,15 +156,16 @@ export default function OrderDetailModal({
 
       {/* Content */}
       <div className="p-6 space-y-6">
-        {/* Status Badge */}
-        <div className="flex items-center justify-center">
-          <div className={`inline-flex items-center space-x-2 px-6 py-3 rounded-2xl text-lg font-semibold border-2 ${
-            statusInfo.color === 'yellow' ? 'bg-yellow-100 text-yellow-700 border-yellow-200' :
-            statusInfo.color === 'green' ? 'bg-green-100 text-green-700 border-green-200' :
-            'bg-gray-100 text-gray-700 border-gray-200'
-          }`}>
+        {/* Status Badges */}
+        <div className="flex flex-wrap gap-4 justify-center">
+          <div className={`inline-flex items-center space-x-2 px-6 py-3 rounded-2xl text-lg font-semibold border-2 ${getStatusColor(order.status)}`}>
             <span className="text-2xl">{statusInfo.icon}</span>
-            <span>{statusInfo.label}</span>
+            <span>{statusInfo.name}</span>
+          </div>
+          
+          <div className={`inline-flex items-center space-x-2 px-6 py-3 rounded-2xl text-lg font-semibold border-2 ${getPaymentStatusColor(order.paymentStatus)}`}>
+            <span className="text-2xl">{getPaymentStatusIcon(order.paymentStatus)}</span>
+            <span>{getPaymentStatusText(order.paymentStatus)}</span>
           </div>
         </div>
 
@@ -140,43 +199,80 @@ export default function OrderDetailModal({
               <p className="font-semibold text-gray-900">{order.invoice}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-600 mb-1">Berat Cucian</p>
-              <p className="font-semibold text-gray-900">{order.weight} kg</p>
+              <p className="text-sm text-gray-600 mb-1">Tanggal Masuk</p>
+              <p className="font-semibold text-gray-900">{formatDate(order.dateIn)}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-600 mb-1">Jenis Layanan</p>
-              <div className="flex items-center space-x-2">
-                <span>{serviceInfo.icon}</span>
-                <span className="font-semibold text-gray-900">{serviceInfo.label}</span>
-              </div>
+              <p className="text-sm text-gray-600 mb-1">Estimasi Selesai</p>
+              <p className="font-semibold text-gray-900">{formatDate(order.estimatedDone)}</p>
             </div>
             <div>
               <p className="text-sm text-gray-600 mb-1">Metode Pembayaran</p>
-              <div className="flex items-center space-x-2">
-                <span>{paymentInfo.icon}</span>
-                <span className="font-semibold text-gray-900">{paymentInfo.label}</span>
+              <div className="font-semibold text-gray-900 flex items-center space-x-2">
+                <span>{getPaymentMethodIcon(order.paymentMethod)}</span>
+                <span>{getPaymentMethodText(order.paymentMethod)}</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Date Information */}
-        <div className="bg-green-50 p-6 rounded-xl border border-green-200">
-          <h3 className="text-lg font-semibold text-green-800 mb-4 flex items-center space-x-2">
-            <span>📅</span>
-            <span>Jadwal</span>
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <p className="text-sm text-green-600 mb-1">Tanggal Masuk</p>
-              <p className="font-semibold text-green-900">{formatDate(order.dateIn)}</p>
-            </div>
-            <div>
-              <p className="text-sm text-green-600 mb-1">Estimasi Selesai</p>
-              <p className="font-semibold text-green-900">{formatDate(order.estimatedDone)}</p>
+        {/* Service Items */}
+        {serviceItems.length > 0 && (
+          <div className="bg-blue-50 p-6 rounded-xl border border-blue-200">
+            <h3 className="text-lg font-semibold text-blue-800 mb-4 flex items-center space-x-2">
+              <span>🧼</span>
+              <span>Layanan Laundry</span>
+            </h3>
+            <div className="space-y-3">
+              {serviceItems.map((item, index) => (
+                <div key={index} className="bg-white p-3 rounded-lg border border-blue-100">
+                  <div className="flex justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900">{item.name}</p>
+                      {item.variation && (
+                        <p className="text-sm text-gray-600">{item.variation}</p>
+                      )}
+                    </div>
+                    <p className="font-medium text-blue-600">{formatCurrency(item.subtotal)}</p>
+                  </div>
+                  <div className="flex justify-between text-sm text-gray-500 mt-1">
+                    <p>{item.sku}</p>
+                    <p>{formatCurrency(item.price)} × {item.weight} kg</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-        </div>
+        )}
+
+        {/* Product Items */}
+        {productItems.length > 0 && (
+          <div className="bg-green-50 p-6 rounded-xl border border-green-200">
+            <h3 className="text-lg font-semibold text-green-800 mb-4 flex items-center space-x-2">
+              <span>🛍️</span>
+              <span>Produk Tambahan</span>
+            </h3>
+            <div className="space-y-3">
+              {productItems.map((item, index) => (
+                <div key={index} className="bg-white p-3 rounded-lg border border-green-100">
+                  <div className="flex justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900">{item.name}</p>
+                      {item.variation && (
+                        <p className="text-sm text-gray-600">{item.variation}</p>
+                      )}
+                    </div>
+                    <p className="font-medium text-green-600">{formatCurrency(item.subtotal)}</p>
+                  </div>
+                  <div className="flex justify-between text-sm text-gray-500 mt-1">
+                    <p>{item.sku}</p>
+                    <p>{formatCurrency(item.price)} × {item.quantity} pcs</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Notes */}
         {order.notes && (
@@ -198,9 +294,6 @@ export default function OrderDetailModal({
           <div className="text-3xl font-bold text-orange-900">
             {formatCurrency(order.total)}
           </div>
-          <p className="text-sm text-orange-700 mt-2">
-            {order.weight} kg × {formatCurrency(serviceInfo.price)}/kg = {formatCurrency(order.weight * serviceInfo.price)}
-          </p>
         </div>
 
         {/* Status Update Section */}
@@ -208,27 +301,27 @@ export default function OrderDetailModal({
           <div className="bg-blue-50 p-6 rounded-xl border border-blue-200">
             <h3 className="text-lg font-semibold text-blue-800 mb-4 flex items-center space-x-2">
               <span>🔄</span>
-              <span>Ubah Status</span>
+              <span>Ubah Status Pesanan</span>
             </h3>
             <div className="space-y-3">
-              {statusOptions.map((status) => (
+              {orderStatuses.filter(status => status.isActive).map((status) => (
                 <label
-                  key={status.value}
+                  key={status.id}
                   className={`flex items-center space-x-3 p-3 border-2 rounded-xl cursor-pointer transition-all duration-300 ${
-                    selectedStatus === status.value
+                    selectedStatus === status.id
                       ? 'border-blue-500 bg-blue-100'
                       : 'border-gray-200 hover:border-blue-300'
                   }`}
                 >
                   <input
                     type="radio"
-                    value={status.value}
-                    checked={selectedStatus === status.value}
+                    value={status.id}
+                    checked={selectedStatus === status.id}
                     onChange={(e) => setSelectedStatus(e.target.value)}
                     className="w-5 h-5 text-blue-600"
                   />
                   <span className="text-xl">{status.icon}</span>
-                  <span className="font-semibold text-gray-900">{status.label}</span>
+                  <span className="font-semibold text-gray-900">{status.name}</span>
                 </label>
               ))}
             </div>
@@ -242,6 +335,67 @@ export default function OrderDetailModal({
               <button
                 onClick={handleStatusUpdate}
                 className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+              >
+                Simpan Status
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Payment Status Update Section */}
+        {showPaymentStatusUpdate && (
+          <div className="bg-green-50 p-6 rounded-xl border border-green-200">
+            <h3 className="text-lg font-semibold text-green-800 mb-4 flex items-center space-x-2">
+              <span>💰</span>
+              <span>Ubah Status Pembayaran</span>
+            </h3>
+            <div className="space-y-3">
+              <label
+                className={`flex items-center space-x-3 p-3 border-2 rounded-xl cursor-pointer transition-all duration-300 ${
+                  selectedPaymentStatus === 'paid'
+                    ? 'border-green-500 bg-green-100'
+                    : 'border-gray-200 hover:border-green-300'
+                }`}
+              >
+                <input
+                  type="radio"
+                  value="paid"
+                  checked={selectedPaymentStatus === 'paid'}
+                  onChange={(e) => setSelectedPaymentStatus(e.target.value as 'paid' | 'unpaid')}
+                  className="w-5 h-5 text-green-600"
+                />
+                <span className="text-xl">✅</span>
+                <span className="font-semibold text-gray-900">Sudah Dibayar</span>
+              </label>
+              
+              <label
+                className={`flex items-center space-x-3 p-3 border-2 rounded-xl cursor-pointer transition-all duration-300 ${
+                  selectedPaymentStatus === 'unpaid'
+                    ? 'border-yellow-500 bg-yellow-100'
+                    : 'border-gray-200 hover:border-yellow-300'
+                }`}
+              >
+                <input
+                  type="radio"
+                  value="unpaid"
+                  checked={selectedPaymentStatus === 'unpaid'}
+                  onChange={(e) => setSelectedPaymentStatus(e.target.value as 'paid' | 'unpaid')}
+                  className="w-5 h-5 text-yellow-600"
+                />
+                <span className="text-xl">⏳</span>
+                <span className="font-semibold text-gray-900">Belum Dibayar</span>
+              </label>
+            </div>
+            <div className="flex space-x-3 mt-4">
+              <button
+                onClick={() => setShowPaymentStatusUpdate(false)}
+                className="flex-1 px-4 py-2 border-2 border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+              >
+                Batal
+              </button>
+              <button
+                onClick={handlePaymentStatusUpdate}
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
               >
                 Simpan Status
               </button>
@@ -266,7 +420,7 @@ export default function OrderDetailModal({
             className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center space-x-2"
           >
             <span>📋</span>
-            <span>Cetak Pesanan</span>
+            <span>Cetak Rincian</span>
           </button>
           
           <button
@@ -278,11 +432,11 @@ export default function OrderDetailModal({
           </button>
           
           <button
-            onClick={onClose}
-            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center space-x-2"
+            onClick={() => setShowPaymentStatusUpdate(!showPaymentStatusUpdate)}
+            className="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center space-x-2"
           >
-            <span>✕</span>
-            <span>Tutup</span>
+            <span>💰</span>
+            <span>Ubah Pembayaran</span>
           </button>
         </div>
       </div>

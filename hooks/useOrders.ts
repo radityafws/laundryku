@@ -8,12 +8,25 @@ export interface Order {
   customerPhone: string;
   dateIn: string;
   estimatedDone: string;
-  weight: number;
-  service: 'regular' | 'express';
-  status: 'in-progress' | 'ready' | 'completed';
+  items: OrderItem[];
+  status: string;
+  paymentStatus: 'paid' | 'unpaid';
   total: number;
   notes?: string;
-  paymentMethod?: 'cash' | 'qris';
+  paymentMethod?: 'cash' | 'qris' | 'transfer';
+}
+
+export interface OrderItem {
+  id: string;
+  type: 'product' | 'service';
+  name: string;
+  sku: string;
+  price: number;
+  quantity?: number;
+  weight?: number;
+  variation?: string;
+  variationId?: string;
+  subtotal: number;
 }
 
 // Mock orders data
@@ -25,12 +38,22 @@ const mockOrders: Order[] = [
     customerPhone: '081234567890',
     dateIn: '2025-01-20',
     estimatedDone: '2025-01-21',
-    weight: 3.5,
-    service: 'express',
-    status: 'ready',
+    status: '2', // Sedang Dicuci
+    paymentStatus: 'paid',
+    paymentMethod: 'cash',
     total: 17500,
     notes: 'Pisahkan baju putih dan berwarna',
-    paymentMethod: 'cash'
+    items: [
+      {
+        id: 'item1',
+        type: 'service',
+        name: 'Cuci Kiloan Express',
+        sku: 'SRV-CKE002',
+        price: 5000,
+        weight: 3.5,
+        subtotal: 17500
+      }
+    ]
   },
   {
     id: '2',
@@ -39,11 +62,32 @@ const mockOrders: Order[] = [
     customerPhone: '081234567891',
     dateIn: '2025-01-19',
     estimatedDone: '2025-01-22',
-    weight: 2.8,
-    service: 'regular',
-    status: 'in-progress',
-    total: 8400,
-    paymentMethod: 'qris'
+    status: '1', // Pesanan Diterima
+    paymentStatus: 'unpaid',
+    paymentMethod: 'qris',
+    total: 18400,
+    items: [
+      {
+        id: 'item2',
+        type: 'service',
+        name: 'Cuci Kiloan Reguler',
+        sku: 'SRV-CKR001',
+        price: 3000,
+        weight: 2.8,
+        subtotal: 8400
+      },
+      {
+        id: 'item3',
+        type: 'product',
+        name: 'Parfum Laundry',
+        sku: 'PRD-PFM005-V01',
+        price: 10000,
+        quantity: 1,
+        variation: 'Aroma Lavender',
+        variationId: 'var4',
+        subtotal: 10000
+      }
+    ]
   },
   {
     id: '3',
@@ -52,12 +96,33 @@ const mockOrders: Order[] = [
     customerPhone: '081234567892',
     dateIn: '2025-01-18',
     estimatedDone: '2025-01-19',
-    weight: 4.2,
-    service: 'express',
-    status: 'completed',
-    total: 21000,
+    status: '6', // Pesanan Selesai
+    paymentStatus: 'paid',
+    paymentMethod: 'cash',
+    total: 31000,
     notes: 'Setrika extra rapi',
-    paymentMethod: 'cash'
+    items: [
+      {
+        id: 'item4',
+        type: 'service',
+        name: 'Cuci Kiloan Express',
+        sku: 'SRV-CKE002',
+        price: 5000,
+        weight: 4.2,
+        subtotal: 21000
+      },
+      {
+        id: 'item5',
+        type: 'product',
+        name: 'Deterjen Cair Premium',
+        sku: 'PRD-DCP004-V01',
+        price: 10000,
+        quantity: 1,
+        variation: 'Ukuran 500ml',
+        variationId: 'var1',
+        subtotal: 10000
+      }
+    ]
   },
   {
     id: '4',
@@ -66,11 +131,21 @@ const mockOrders: Order[] = [
     customerPhone: '081234567893',
     dateIn: '2025-01-20',
     estimatedDone: '2025-01-23',
-    weight: 5.1,
-    service: 'regular',
-    status: 'in-progress',
+    status: '3', // Sedang Dikeringkan
+    paymentStatus: 'paid',
+    paymentMethod: 'transfer',
     total: 15300,
-    paymentMethod: 'qris'
+    items: [
+      {
+        id: 'item6',
+        type: 'service',
+        name: 'Cuci Kiloan Reguler',
+        sku: 'SRV-CKR001',
+        price: 3000,
+        weight: 5.1,
+        subtotal: 15300
+      }
+    ]
   },
   {
     id: '5',
@@ -79,12 +154,31 @@ const mockOrders: Order[] = [
     customerPhone: '081234567894',
     dateIn: '2025-01-19',
     estimatedDone: '2025-01-20',
-    weight: 1.8,
-    service: 'express',
-    status: 'ready',
-    total: 9000,
+    status: '5', // Siap Diambil
+    paymentStatus: 'paid',
+    paymentMethod: 'cash',
+    total: 19000,
     notes: 'Jangan gunakan pelembut',
-    paymentMethod: 'cash'
+    items: [
+      {
+        id: 'item7',
+        type: 'service',
+        name: 'Cuci Kiloan Express',
+        sku: 'SRV-CKE002',
+        price: 5000,
+        weight: 1.8,
+        subtotal: 9000
+      },
+      {
+        id: 'item8',
+        type: 'product',
+        name: 'Kantong Plastik Laundry',
+        sku: 'PRD-PKG006',
+        price: 5000,
+        quantity: 2,
+        subtotal: 10000
+      }
+    ]
   },
   {
     id: '6',
@@ -93,11 +187,21 @@ const mockOrders: Order[] = [
     customerPhone: '081234567895',
     dateIn: '2025-01-17',
     estimatedDone: '2025-01-18',
-    weight: 3.0,
-    service: 'express',
-    status: 'completed',
+    status: '6', // Pesanan Selesai
+    paymentStatus: 'paid',
+    paymentMethod: 'qris',
     total: 15000,
-    paymentMethod: 'qris'
+    items: [
+      {
+        id: 'item9',
+        type: 'service',
+        name: 'Cuci Kiloan Express',
+        sku: 'SRV-CKE002',
+        price: 5000,
+        weight: 3.0,
+        subtotal: 15000
+      }
+    ]
   },
   {
     id: '7',
@@ -106,12 +210,33 @@ const mockOrders: Order[] = [
     customerPhone: '081234567896',
     dateIn: '2025-01-20',
     estimatedDone: '2025-01-23',
-    weight: 6.5,
-    service: 'regular',
-    status: 'in-progress',
-    total: 19500,
+    status: '4', // Sedang Disetrika
+    paymentStatus: 'unpaid',
+    paymentMethod: 'cash',
+    total: 29500,
     notes: 'Cuci terpisah untuk jas',
-    paymentMethod: 'cash'
+    items: [
+      {
+        id: 'item10',
+        type: 'service',
+        name: 'Cuci Kiloan Reguler',
+        sku: 'SRV-CKR001',
+        price: 3000,
+        weight: 6.5,
+        subtotal: 19500
+      },
+      {
+        id: 'item11',
+        type: 'product',
+        name: 'Parfum Laundry',
+        sku: 'PRD-PFM005-V02',
+        price: 10000,
+        quantity: 1,
+        variation: 'Aroma Lemon',
+        variationId: 'var5',
+        subtotal: 10000
+      }
+    ]
   },
   {
     id: '8',
@@ -120,11 +245,21 @@ const mockOrders: Order[] = [
     customerPhone: '081234567897',
     dateIn: '2025-01-19',
     estimatedDone: '2025-01-20',
-    weight: 2.3,
-    service: 'express',
-    status: 'ready',
+    status: '5', // Siap Diambil
+    paymentStatus: 'paid',
+    paymentMethod: 'qris',
     total: 11500,
-    paymentMethod: 'qris'
+    items: [
+      {
+        id: 'item12',
+        type: 'service',
+        name: 'Cuci Kiloan Express',
+        sku: 'SRV-CKE002',
+        price: 5000,
+        weight: 2.3,
+        subtotal: 11500
+      }
+    ]
   }
 ];
 
