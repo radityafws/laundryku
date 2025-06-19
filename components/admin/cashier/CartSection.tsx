@@ -241,7 +241,7 @@ export default function CartSection({
               />
               <button
                 onClick={applyPromoCode}
-                className="px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium transition-colors"
+                className="px-2 sm:px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium transition-colors text-xs sm:text-sm whitespace-nowrap"
               >
                 Terapkan
               </button>

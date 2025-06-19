@@ -91,7 +91,7 @@ export default function PaymentSection({
             Metode Pembayaran
           </label>
           <div className="grid grid-cols-3 gap-3">
-            <label className={`flex items-center justify-center space-x-2 p-3 border-2 rounded-xl cursor-pointer transition-all duration-300 ${
+            <label className={`flex flex-col items-center justify-center p-3 border-2 rounded-xl cursor-pointer transition-all duration-300 ${
               paymentMethod === 'cash'
                 ? 'border-blue-500 bg-blue-50'
                 : 'border-gray-200 hover:border-blue-300'
@@ -104,10 +104,10 @@ export default function PaymentSection({
                 className="sr-only"
               />
               <span className="text-xl">💵</span>
-              <span className="font-medium text-gray-900 text-sm">Tunai</span>
+              <span className="font-medium text-gray-900 text-sm mt-1">Tunai</span>
             </label>
             
-            <label className={`flex items-center justify-center space-x-2 p-3 border-2 rounded-xl cursor-pointer transition-all duration-300 ${
+            <label className={`flex flex-col items-center justify-center p-3 border-2 rounded-xl cursor-pointer transition-all duration-300 ${
               paymentMethod === 'qris'
                 ? 'border-blue-500 bg-blue-50'
                 : 'border-gray-200 hover:border-blue-300'
@@ -120,10 +120,10 @@ export default function PaymentSection({
                 className="sr-only"
               />
               <span className="text-xl">📱</span>
-              <span className="font-medium text-gray-900 text-sm">QRIS</span>
+              <span className="font-medium text-gray-900 text-sm mt-1">QRIS</span>
             </label>
             
-            <label className={`flex items-center justify-center space-x-2 p-3 border-2 rounded-xl cursor-pointer transition-all duration-300 ${
+            <label className={`flex flex-col items-center justify-center p-3 border-2 rounded-xl cursor-pointer transition-all duration-300 ${
               paymentMethod === 'transfer'
                 ? 'border-blue-500 bg-blue-50'
                 : 'border-gray-200 hover:border-blue-300'
@@ -136,7 +136,7 @@ export default function PaymentSection({
                 className="sr-only"
               />
               <span className="text-xl">🏦</span>
-              <span className="font-medium text-gray-900 text-sm">Transfer</span>
+              <span className="font-medium text-gray-900 text-sm mt-1">Transfer</span>
             </label>
           </div>
         </div>
@@ -147,7 +147,7 @@ export default function PaymentSection({
             Status Pembayaran
           </label>
           <div className="grid grid-cols-2 gap-3">
-            <label className={`flex items-center justify-center space-x-2 p-3 border-2 rounded-xl cursor-pointer transition-all duration-300 ${
+            <label className={`flex flex-col items-center justify-center p-3 border-2 rounded-xl cursor-pointer transition-all duration-300 ${
               paymentStatus === 'paid'
                 ? 'border-green-500 bg-green-50'
                 : 'border-gray-200 hover:border-green-300'
@@ -160,10 +160,10 @@ export default function PaymentSection({
                 className="sr-only"
               />
               <span className="text-xl">✅</span>
-              <span className="font-medium text-gray-900 text-sm">Sudah Dibayar</span>
+              <span className="font-medium text-gray-900 text-sm mt-1">Sudah Dibayar</span>
             </label>
             
-            <label className={`flex items-center justify-center space-x-2 p-3 border-2 rounded-xl cursor-pointer transition-all duration-300 ${
+            <label className={`flex flex-col items-center justify-center p-3 border-2 rounded-xl cursor-pointer transition-all duration-300 ${
               paymentStatus === 'unpaid'
                 ? 'border-yellow-500 bg-yellow-50'
                 : 'border-gray-200 hover:border-yellow-300'
@@ -176,7 +176,7 @@ export default function PaymentSection({
                 className="sr-only"
               />
               <span className="text-xl">⏳</span>
-              <span className="font-medium text-gray-900 text-sm">Belum Dibayar</span>
+              <span className="font-medium text-gray-900 text-sm mt-1">Belum Dibayar</span>
             </label>
           </div>
         </div>

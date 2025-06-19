@@ -191,9 +191,9 @@ export default function ProductCatalog({ addToCart }: ProductCatalogProps) {
         </div>
       ) : displayMode === 'grid' ? (
         // Grid View
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 max-h-[500px] overflow-y-auto p-1">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-h-[500px] overflow-y-auto p-1">
           {filteredProducts.map((product) => (
-            <div key={product.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+            <div key={product.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow h-full flex flex-col">
               {/* Product Header */}
               <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-3 border-b border-gray-200">
                 <div className="flex items-center justify-between">
@@ -210,11 +210,11 @@ export default function ProductCatalog({ addToCart }: ProductCatalogProps) {
               </div>
               
               {/* Product Content */}
-              <div className="p-3 space-y-2">
-                <h4 className="font-medium text-gray-900 line-clamp-2 h-10">{product.name}</h4>
+              <div className="p-3 space-y-2 flex-1 flex flex-col">
+                <h4 className="font-medium text-gray-900 line-clamp-2 min-h-[40px]">{product.name}</h4>
                 
                 {/* Price & Stock */}
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center mt-auto">
                   <div className="text-sm font-semibold text-blue-600">
                     {product.hasVariations 
                       ? `${formatCurrency(Math.min(...product.variations.map(v => v.price)))} +`

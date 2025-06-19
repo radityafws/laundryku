@@ -202,7 +202,7 @@ export default function CashierPage() {
         {/* Main Content */}
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
           {/* Left Column - Customer & Products */}
-          <div className="xl:col-span-8 space-y-6">
+          <div className="xl:col-span-8 space-y-6 order-1">
             {/* Customer Selection */}
             <CustomerSection 
               selectedCustomer={selectedCustomer}
@@ -216,7 +216,7 @@ export default function CashierPage() {
           </div>
           
           {/* Right Column - Cart & Payment */}
-          <div className="xl:col-span-4 space-y-6">
+          <div className="xl:col-span-4 space-y-6 order-2 xl:order-2">
             {/* Cart */}
             <CartSection 
               cartItems={cartItems}
@@ -224,8 +224,10 @@ export default function CashierPage() {
               appliedPromos={appliedPromos}
               setAppliedPromos={setAppliedPromos}
             />
-            
-            {/* Payment Information */}
+          </div>
+
+          {/* Payment Section - Full Width on Mobile, Right Column on Desktop */}
+          <div className="order-3 xl:col-span-4 xl:col-start-9 xl:row-start-2">
             <PaymentSection 
               cartItems={cartItems}
               appliedPromos={appliedPromos}
