@@ -54,6 +54,7 @@ export default function CashierPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [newOrderData, setNewOrderData] = useState<any>(null);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   // Debounce search term
   const debouncedSearchTerm = useDebounce(searchTerm, 400);
@@ -372,7 +373,7 @@ export default function CashierPage() {
       <div className="space-y-6">
         {/* Header */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h2 className="text-2xl font-bold text-gray-900 flex items-center space-x-2">
                 <span>💰</span>
@@ -393,7 +394,8 @@ export default function CashierPage() {
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
+        {/* Main Content - Responsive Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column - Customer & Products */}
           <div className="lg:col-span-2 space-y-6">
             {/* Customer Information */}
@@ -476,7 +478,34 @@ export default function CashierPage() {
                   </h3>
                 </div>
                 
-                <div className="flex items-center space-x-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  {/* View Mode Toggle */}
+                  <div className="flex items-center bg-gray-100 rounded-lg p-1 mr-2">
+                    <button
+                      onClick={() => setViewMode('grid')}
+                      className={`p-2 rounded-md ${
+                        viewMode === 'grid'
+                          ? 'bg-white shadow-sm'
+                          : 'text-gray-600 hover:bg-gray-200'
+                      }`}
+                      title="Grid View"
+                    >
+                      <span className="text-sm">🔲</span>
+                    </button>
+                    <button
+                      onClick={() => setViewMode('list')}
+                      className={`p-2 rounded-md ${
+                        viewMode === 'list'
+                          ? 'bg-white shadow-sm'
+                          : 'text-gray-600 hover:bg-gray-200'
+                      }`}
+                      title="List View"
+                    >
+                      <span className="text-sm">📃</span>
+                    </button>
+                  </div>
+                  
+                  {/* Filter Buttons */}
                   <button
                     onClick={() => setProductFilter('all')}
                     className={`px-3 py-1 rounded-lg text-sm font-medium ${
@@ -535,89 +564,167 @@ export default function CashierPage() {
                 </div>
               </div>
 
-              {/* Products Grid */}
+              {/* Products Display */}
               {isLoadingProducts ? (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                <div className={viewMode === 'grid' 
+                  ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"
+                  : "space-y-3"
+                }>
                   {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                    <div key={i} className="animate-pulse">
-                      <div className="bg-gray-200 h-32 rounded-xl mb-2"></div>
-                      <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                      <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                    </div>
+                    viewMode === 'grid' ? (
+                      <div key={i} className="animate-pulse">
+                        <div className="bg-gray-200 h-32 rounded-xl mb-2"></div>
+                        <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                      </div>
+                    ) : (
+                      <div key={i} className="animate-pulse flex items-center p-3 rounded-xl border border-gray-200">
+                        <div className="w-12 h-12 bg-gray-200 rounded-lg mr-3"></div>
+                        <div className="flex-1">
+                          <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                          <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                        </div>
+                        <div className="w-20 h-8 bg-gray-200 rounded"></div>
+                      </div>
+                    )
                   ))}
                 </div>
               ) : filteredProducts.length > 0 ? (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                  {filteredProducts.map((product) => (
-                    <div
-                      key={product.id}
-                      className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow duration-300"
-                    >
-                      <div 
-                        className={`p-4 cursor-pointer ${
-                          product.hasVariations ? 'bg-blue-50' : 'bg-gray-50'
-                        }`}
-                        onClick={() => handleAddToCart(product)}
+                viewMode === 'grid' ? (
+                  // Grid View
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    {filteredProducts.map((product) => (
+                      <div
+                        key={product.id}
+                        className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow duration-300"
                       >
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-lg">
+                        <div 
+                          className={`p-4 cursor-pointer ${
+                            product.hasVariations ? 'bg-blue-50' : 'bg-gray-50'
+                          }`}
+                          onClick={() => handleAddToCart(product)}
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-lg">
+                              {product.type === 'service' ? '🧼' : '🛍️'}
+                            </span>
+                            <span className={`text-xs px-2 py-1 rounded-full ${
+                              product.type === 'service' 
+                                ? 'bg-blue-100 text-blue-700' 
+                                : 'bg-green-100 text-green-700'
+                            }`}>
+                              {product.type === 'service' ? 'Layanan' : 'Produk'}
+                            </span>
+                          </div>
+                          
+                          <h4 className="font-medium text-gray-900 mb-1 line-clamp-2">
+                            {product.name}
+                          </h4>
+                          
+                          {product.hasVariations ? (
+                            <div className="text-sm text-blue-600 font-medium">
+                              {formatCurrency(Math.min(...product.variations.map(v => v.price)))} - {formatCurrency(Math.max(...product.variations.map(v => v.price)))}
+                            </div>
+                          ) : (
+                            <div className="text-sm text-blue-600 font-medium">
+                              {formatCurrency(product.price)}
+                            </div>
+                          )}
+                          
+                          {product.type === 'product' && !product.hasVariations && (
+                            <div className={`text-xs mt-1 ${
+                              product.stock > 0 ? 'text-green-600' : 'text-red-600'
+                            }`}>
+                              {product.stock > 0 ? `Stok: ${product.stock}` : 'Stok Habis'}
+                            </div>
+                          )}
+                          
+                          {product.hasVariations && (
+                            <div className="text-xs text-gray-500 mt-1">
+                              {product.variations.length} variasi tersedia
+                            </div>
+                          )}
+                        </div>
+                        
+                        {/* Quick Add Button */}
+                        {!product.hasVariations && (
+                          <button
+                            onClick={() => handleAddToCart(product)}
+                            disabled={product.type === 'product' && product.stock === 0}
+                            className={`w-full py-2 text-sm font-medium ${
+                              product.type === 'product' && product.stock === 0
+                                ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                                : 'bg-blue-600 text-white hover:bg-blue-700'
+                            }`}
+                          >
+                            + Tambah ke Keranjang
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  // List View
+                  <div className="space-y-3">
+                    {filteredProducts.map((product) => (
+                      <div
+                        key={product.id}
+                        className="flex items-center p-3 rounded-xl border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200"
+                      >
+                        <div className={`w-12 h-12 rounded-lg flex items-center justify-center mr-3 ${
+                          product.type === 'service' ? 'bg-blue-100' : 'bg-green-100'
+                        }`}>
+                          <span className="text-xl">
                             {product.type === 'service' ? '🧼' : '🛍️'}
-                          </span>
-                          <span className={`text-xs px-2 py-1 rounded-full ${
-                            product.type === 'service' 
-                              ? 'bg-blue-100 text-blue-700' 
-                              : 'bg-green-100 text-green-700'
-                          }`}>
-                            {product.type === 'service' ? 'Layanan' : 'Produk'}
                           </span>
                         </div>
                         
-                        <h4 className="font-medium text-gray-900 mb-1 line-clamp-2">
-                          {product.name}
-                        </h4>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium text-gray-900 truncate">{product.name}</h4>
+                          <div className="flex items-center text-sm">
+                            <span className={`inline-block px-2 py-0.5 rounded-full text-xs mr-2 ${
+                              product.type === 'service' 
+                                ? 'bg-blue-100 text-blue-700' 
+                                : 'bg-green-100 text-green-700'
+                            }`}>
+                              {product.type === 'service' ? 'Layanan' : 'Produk'}
+                            </span>
+                            
+                            {product.hasVariations ? (
+                              <span className="text-blue-600">
+                                {formatCurrency(Math.min(...product.variations.map(v => v.price)))} - {formatCurrency(Math.max(...product.variations.map(v => v.price)))}
+                              </span>
+                            ) : (
+                              <span className="text-blue-600">
+                                {formatCurrency(product.price)}
+                              </span>
+                            )}
+                            
+                            {product.type === 'product' && !product.hasVariations && (
+                              <span className={`ml-2 text-xs ${
+                                product.stock > 0 ? 'text-green-600' : 'text-red-600'
+                              }`}>
+                                {product.stock > 0 ? `(Stok: ${product.stock})` : '(Stok Habis)'}
+                              </span>
+                            )}
+                          </div>
+                        </div>
                         
-                        {product.hasVariations ? (
-                          <div className="text-sm text-blue-600 font-medium">
-                            {formatCurrency(Math.min(...product.variations.map(v => v.price)))} - {formatCurrency(Math.max(...product.variations.map(v => v.price)))}
-                          </div>
-                        ) : (
-                          <div className="text-sm text-blue-600 font-medium">
-                            {formatCurrency(product.price)}
-                          </div>
-                        )}
-                        
-                        {product.type === 'product' && !product.hasVariations && (
-                          <div className={`text-xs mt-1 ${
-                            product.stock > 0 ? 'text-green-600' : 'text-red-600'
-                          }`}>
-                            {product.stock > 0 ? `Stok: ${product.stock}` : 'Stok Habis'}
-                          </div>
-                        )}
-                        
-                        {product.hasVariations && (
-                          <div className="text-xs text-gray-500 mt-1">
-                            {product.variations.length} variasi tersedia
-                          </div>
-                        )}
-                      </div>
-                      
-                      {/* Quick Add Button */}
-                      {!product.hasVariations && (
                         <button
                           onClick={() => handleAddToCart(product)}
-                          disabled={product.type === 'product' && product.stock === 0}
-                          className={`w-full py-2 text-sm font-medium ${
-                            product.type === 'product' && product.stock === 0
+                          disabled={product.type === 'product' && !product.hasVariations && product.stock === 0}
+                          className={`px-3 py-2 rounded-lg text-sm font-medium ${
+                            product.type === 'product' && !product.hasVariations && product.stock === 0
                               ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
                               : 'bg-blue-600 text-white hover:bg-blue-700'
                           }`}
                         >
-                          + Tambah ke Keranjang
+                          {product.hasVariations ? 'Pilih Variasi' : '+ Tambah'}
                         </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                      </div>
+                    ))}
+                  </div>
+                )
               ) : (
                 <div className="text-center py-12">
                   <div className="text-4xl mb-4">🔍</div>
@@ -635,28 +742,31 @@ export default function CashierPage() {
           {/* Right Column - Cart & Payment */}
           <div className="space-y-6">
             {/* Cart */}
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sticky top-24">
               <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center space-x-2">
                 <span>🛒</span>
                 <span>Keranjang</span>
+                {cart.length > 0 && <span className="text-sm bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">{cart.length}</span>}
               </h3>
 
               {cart.length > 0 ? (
                 <div className="space-y-4">
                   {/* Cart Items */}
-                  <div className="max-h-96 overflow-y-auto space-y-3">
+                  <div className="max-h-96 overflow-y-auto space-y-3 pr-1">
                     {cart.map((item) => (
-                      <div key={item.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                      <div key={item.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
                         <div className="flex-1 min-w-0">
                           <h4 className="font-medium text-gray-900 text-sm">{item.name}</h4>
                           {item.variation && (
                             <p className="text-xs text-gray-600">{item.variation}</p>
                           )}
-                          <p className="text-xs text-gray-500">{item.sku}</p>
-                          <p className="text-sm text-blue-600 font-medium">{formatCurrency(item.price)}</p>
+                          <div className="flex items-center justify-between mt-1">
+                            <p className="text-xs text-gray-500">{item.sku}</p>
+                            <p className="text-sm text-blue-600 font-medium">{formatCurrency(item.price)}</p>
+                          </div>
                         </div>
                         
-                        <div className="flex items-center space-x-3">
+                        <div className="flex items-center space-x-3 ml-2">
                           <div className="flex items-center">
                             <input
                               type="number"
@@ -673,7 +783,7 @@ export default function CashierPage() {
                           
                           <button
                             onClick={() => handleRemoveFromCart(item.id)}
-                            className="text-red-500 hover:text-red-700"
+                            className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50"
                           >
                             ✕
                           </button>
@@ -728,55 +838,46 @@ export default function CashierPage() {
                   <p className="text-sm text-gray-500 mt-1">Tambahkan produk atau layanan</p>
                 </div>
               )}
-            </div>
 
-            {/* Promo Code */}
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center space-x-2">
-                <span>🎁</span>
-                <span>Kode Promo</span>
-              </h3>
-
-              <div className="flex space-x-2">
-                <input
-                  {...register('promoCode')}
-                  type="text"
-                  placeholder="Masukkan kode promo"
-                  className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-300 outline-none"
-                />
-                <button
-                  type="button"
-                  onClick={handleApplyPromo}
-                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-xl font-medium transition-colors"
-                >
-                  Terapkan
-                </button>
-              </div>
-
-              {/* Active Promos */}
-              {appliedPromos.length > 0 && (
-                <div className="mt-4 space-y-2">
-                  <h4 className="text-sm font-medium text-gray-700">Promo Aktif:</h4>
-                  {appliedPromos.map((promo) => (
-                    <div key={promo.id} className="flex items-center justify-between bg-green-50 p-2 rounded-lg border border-green-200">
-                      <div>
-                        <p className="text-sm font-medium text-green-700">{promo.code}</p>
-                        <p className="text-xs text-green-600">
-                          {promo.type === 'percentage' 
-                            ? `${promo.value}% off` 
-                            : formatCurrency(promo.value)}
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => handleRemovePromo(promo.id)}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  ))}
+              {/* Promo Code */}
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <h4 className="text-sm font-medium text-gray-700 mb-2">🎁 Kode Promo</h4>
+                <div className="flex space-x-2">
+                  <input
+                    {...register('promoCode')}
+                    type="text"
+                    placeholder="Masukkan kode promo"
+                    className="flex-1 px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all duration-300 outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleApplyPromo}
+                    className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg font-medium transition-colors text-sm whitespace-nowrap"
+                  >
+                    Terapkan
+                  </button>
                 </div>
-              )}
+
+                {/* Active Promos */}
+                {appliedPromos.length > 0 && (
+                  <div className="mt-3 space-y-2">
+                    <h4 className="text-xs font-medium text-gray-700">Promo Aktif:</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {appliedPromos.map((promo) => (
+                        <div key={promo.id} className="inline-flex items-center bg-green-50 px-2 py-1 rounded-lg border border-green-200">
+                          <span className="text-xs font-medium text-green-700 mr-1">{promo.code}</span>
+                          <button
+                            onClick={() => handleRemovePromo(promo.id)}
+                            className="text-red-500 hover:text-red-700 text-xs"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Payment Information */}
