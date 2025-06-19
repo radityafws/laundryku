@@ -44,6 +44,12 @@ const menuItems = [
     description: 'Staff Management'
   },
   {
+    icon: '🧺',
+    label: 'Produk & Layanan',
+    href: '/admin/products',
+    description: 'Products & Services'
+  },
+  {
     icon: '🎯',
     label: 'Manajemen Promosi',
     href: '/admin/promotions',
