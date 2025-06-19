@@ -155,7 +155,7 @@ export default function EmployeesPage() {
                   Menampilkan {filteredEmployees.length} dari {employees?.length || 0} pegawai
                   {debouncedSearchTerm && (
                     <span className="ml-2 bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs">
-                      &quot;{debouncedSearchTerm}&quot;
+                      &ldquo;{debouncedSearchTerm}&rdquo;
                     </span>
                   )}
                 </span>

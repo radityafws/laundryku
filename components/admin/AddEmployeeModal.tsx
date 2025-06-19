@@ -465,7 +465,7 @@ export default function AddEmployeeModal({ isOpen, onClose }: AddEmployeeModalPr
                 <li>• Nomor HP dan email akan dicek otomatis untuk duplikasi</li>
                 <li>• Jabatan dapat dipilih dari daftar atau dibuat baru</li>
                 <li>• Data pegawai dapat diubah setelah disimpan</li>
-                <li>• Status pegawai akan otomatis diset sebagai "Aktif"</li>
+                <li>• Status pegawai akan otomatis diset sebagai &ldquo;Aktif&rdquo;</li>
               </ul>
             </div>
           </div>

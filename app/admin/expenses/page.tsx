@@ -237,7 +237,7 @@ export default function ExpensesPage() {
                 <span className="text-purple-600">Filter aktif:</span>
                 {searchTerm && (
                   <span className="bg-purple-100 text-purple-700 px-2 py-1 rounded-full text-xs">
-                    Pencarian: &quot;{searchTerm}&quot;
+                    Pencarian: &ldquo;{searchTerm}&rdquo;
                   </span>
                 )}
                 {categoryFilter !== 'all' && (
