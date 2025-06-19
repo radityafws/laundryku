@@ -181,6 +181,42 @@ const mockProducts: Product[] = [
     variations: [],
     status: 'inactive',
     createdAt: '2025-01-10'
+  },
+  {
+    id: '9',
+    name: 'Cuci Karpet',
+    sku: 'SRV-CKP009',
+    price: 0,
+    stock: 0,
+    category: 'laundry',
+    type: 'service',
+    description: 'Layanan cuci karpet dengan berbagai ukuran',
+    hasVariations: true,
+    variations: [
+      {
+        id: 'var7',
+        name: 'Karpet Kecil (< 2m²)',
+        sku: 'SRV-CKP009-V01',
+        price: 35000,
+        stock: 0
+      },
+      {
+        id: 'var8',
+        name: 'Karpet Sedang (2-5m²)',
+        sku: 'SRV-CKP009-V02',
+        price: 60000,
+        stock: 0
+      },
+      {
+        id: 'var9',
+        name: 'Karpet Besar (> 5m²)',
+        sku: 'SRV-CKP009-V03',
+        price: 100000,
+        stock: 0
+      }
+    ],
+    status: 'active',
+    createdAt: '2025-01-12'
   }
 ];
 

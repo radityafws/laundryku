@@ -1,9 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import Modal from '@/components/ui/Modal';
+import Select from '@/components/ui/Select';
+import { useDebounce } from '@/hooks/useDebounce';
 import { toast } from 'react-toastify';
+import { checkSkuAvailability } from '@/lib/product-api';
 
 interface AddProductModalProps {
   isOpen: boolean;
@@ -28,8 +31,19 @@ interface ProductFormData {
   status: 'active' | 'inactive';
 }
 
+interface CategoryOption {
+  value: string;
+  label: string;
+  icon: string;
+}
+
 export default function AddProductModal({ isOpen, onClose }: AddProductModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCheckingSku, setIsCheckingSku] = useState(false);
+  const [skuError, setSkuError] = useState('');
+  const [variationSkuErrors, setVariationSkuErrors] = useState<{[key: number]: string}>({});
+  const [selectedCategory, setSelectedCategory] = useState<CategoryOption | null>(null);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(false);
 
   const {
     register,
@@ -38,14 +52,16 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
     formState: { errors },
     reset,
     setValue,
-    control
+    control,
+    setError,
+    clearErrors
   } = useForm<ProductFormData>({
     defaultValues: {
       name: '',
       sku: '',
       price: 0,
       stock: 0,
-      category: 'laundry',
+      category: '',
       type: 'service',
       description: '',
       hasVariations: false,
@@ -62,6 +78,90 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
   const watchHasVariations = watch('hasVariations');
   const watchType = watch('type');
   const watchName = watch('name');
+  const watchSku = watch('sku');
+  const watchVariations = watch('variations');
+
+  // Debounce SKU for backend validation
+  const debouncedSku = useDebounce(watchSku, 500);
+
+  // Check SKU uniqueness when debounced SKU changes
+  useEffect(() => {
+    if (debouncedSku && debouncedSku.length >= 4) {
+      validateSku(debouncedSku);
+    } else {
+      setSkuError('');
+      clearErrors('sku');
+    }
+  }, [debouncedSku]);
+
+  // Validate variation SKUs when they change
+  useEffect(() => {
+    if (watchHasVariations && watchVariations) {
+      const newErrors: {[key: number]: string} = {};
+      let hasValidationRunning = false;
+      
+      watchVariations.forEach((variation, index) => {
+        if (variation.sku && variation.sku.length >= 4) {
+          hasValidationRunning = true;
+          validateVariationSku(variation.sku, index);
+        }
+      });
+      
+      if (!hasValidationRunning) {
+        setVariationSkuErrors({});
+      }
+    }
+  }, [watchVariations, watchHasVariations]);
+
+  const validateSku = async (sku: string) => {
+    setIsCheckingSku(true);
+    setSkuError('');
+    
+    try {
+      const isAvailable = await checkSkuAvailability(sku);
+      
+      if (!isAvailable) {
+        setSkuError('SKU sudah digunakan');
+        setError('sku', { 
+          type: 'manual', 
+          message: 'SKU sudah digunakan' 
+        });
+      } else {
+        setSkuError('');
+        clearErrors('sku');
+      }
+    } catch (error) {
+      console.error('Error checking SKU:', error);
+    } finally {
+      setIsCheckingSku(false);
+    }
+  };
+
+  const validateVariationSku = async (sku: string, index: number) => {
+    try {
+      const isAvailable = await checkSkuAvailability(sku);
+      
+      if (!isAvailable) {
+        setVariationSkuErrors(prev => ({
+          ...prev,
+          [index]: 'SKU sudah digunakan'
+        }));
+        setError(`variations.${index}.sku` as any, { 
+          type: 'manual', 
+          message: 'SKU sudah digunakan' 
+        });
+      } else {
+        setVariationSkuErrors(prev => {
+          const newErrors = {...prev};
+          delete newErrors[index];
+          return newErrors;
+        });
+        clearErrors(`variations.${index}.sku` as any);
+      }
+    } catch (error) {
+      console.error('Error checking variation SKU:', error);
+    }
+  };
 
   // Generate SKU based on product name
   const generateSku = () => {
@@ -104,9 +204,71 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
     append({ name: '', sku: '', price: 0, stock: 0 });
   };
 
+  // Handle category selection
+  const handleCategorySelect = (category: CategoryOption | null) => {
+    setSelectedCategory(category);
+    if (category) {
+      setValue('category', category.value);
+      clearErrors('category');
+    } else {
+      setValue('category', '');
+    }
+  };
+
+  // Handle creating new category
+  const handleCreateCategory = (inputValue: string) => {
+    const newCategory: CategoryOption = {
+      value: inputValue.toLowerCase().replace(/\s+/g, '_'),
+      label: inputValue,
+      icon: '🏷️'
+    };
+    
+    setValue('category', newCategory.value);
+    setSelectedCategory(newCategory);
+    clearErrors('category');
+  };
+
+  // Fetch categories (simulated)
+  const fetchCategories = async (searchTerm: string) => {
+    setIsLoadingCategories(true);
+    
+    try {
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Default categories
+      const defaultCategories: CategoryOption[] = [
+        { value: 'laundry', label: 'Layanan Laundry', icon: '🧺' },
+        { value: 'detergent', label: 'Detergen', icon: '🧴' },
+        { value: 'perfume', label: 'Parfum', icon: '🌸' },
+        { value: 'packaging', label: 'Kemasan', icon: '📦' },
+        { value: 'other', label: 'Lainnya', icon: '🔖' }
+      ];
+      
+      // Filter categories based on search term
+      return defaultCategories.filter(category => 
+        category.label.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    } finally {
+      setIsLoadingCategories(false);
+    }
+  };
+
   const onSubmit = async (data: ProductFormData) => {
+    // Check for SKU errors
+    if (skuError) {
+      toast.error('SKU utama sudah digunakan. Silakan gunakan SKU lain.');
+      return;
+    }
+    
     // Validate variations if hasVariations is true
     if (data.hasVariations) {
+      // Check for variation SKU errors
+      if (Object.keys(variationSkuErrors).length > 0) {
+        toast.error('Beberapa SKU variasi sudah digunakan. Silakan periksa kembali.');
+        return;
+      }
+      
       const emptyVariations = data.variations.some(v => !v.name);
       if (emptyVariations) {
         toast.error('Semua nama variasi harus diisi');
@@ -133,8 +295,12 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
         ...data,
         id: `item_${Date.now()}`,
         createdAt: new Date().toISOString(),
-        // For services, set stock to 0 and hasVariations to false
-        ...(data.type === 'service' && { stock: 0, hasVariations: false, variations: [] })
+        // For services without variations, set stock to 0
+        ...(data.type === 'service' && !data.hasVariations && { stock: 0 }),
+        // For services with variations, keep variations but set stock to 0
+        ...(data.type === 'service' && data.hasVariations && {
+          variations: data.variations.map(v => ({...v, stock: 0}))
+        })
       };
 
       console.log('Creating product:', productData);
@@ -162,10 +328,13 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
 
   const handleClose = () => {
     reset();
+    setSkuError('');
+    setVariationSkuErrors({});
+    setSelectedCategory(null);
     onClose();
   };
 
-  const categoryOptions = [
+  const categoryOptions: CategoryOption[] = [
     { value: 'laundry', label: 'Layanan Laundry', icon: '🧺' },
     { value: 'detergent', label: 'Detergen', icon: '🧴' },
     { value: 'perfume', label: 'Parfum', icon: '🌸' },
@@ -215,20 +384,31 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
               🏷️ SKU <span className="text-red-500">*</span>
             </label>
             <div className="flex space-x-2">
-              <input
-                {...register('sku', {
-                  required: 'SKU wajib diisi',
-                  pattern: {
-                    value: /^[A-Z0-9\-]+$/,
-                    message: 'SKU hanya boleh berisi huruf besar, angka, dan tanda hubung'
-                  }
-                })}
-                type="text"
-                placeholder="PRD-001"
-                className={`flex-1 px-4 py-3 border-2 rounded-xl focus:ring-4 focus:ring-blue-100 transition-all duration-300 outline-none ${
-                  errors.sku ? 'border-red-300 focus:border-red-500' : 'border-gray-200 focus:border-blue-500'
-                }`}
-              />
+              <div className="relative flex-1">
+                <input
+                  {...register('sku', {
+                    required: 'SKU wajib diisi',
+                    pattern: {
+                      value: /^[A-Z0-9\-]+$/,
+                      message: 'SKU hanya boleh berisi huruf besar, angka, dan tanda hubung'
+                    }
+                  })}
+                  type="text"
+                  placeholder="PRD-001"
+                  className={`w-full px-4 py-3 pr-10 border-2 rounded-xl focus:ring-4 focus:ring-blue-100 transition-all duration-300 outline-none ${
+                    errors.sku || skuError ? 'border-red-300 focus:border-red-500' : 'border-gray-200 focus:border-blue-500'
+                  }`}
+                />
+                
+                {/* Loading/Status indicator */}
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  {isCheckingSku ? (
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                  ) : watchSku && watchSku.length >= 4 && !skuError ? (
+                    <span className="text-green-500 text-lg">✅</span>
+                  ) : null}
+                </div>
+              </div>
               <button
                 type="button"
                 onClick={generateSku}
@@ -239,6 +419,9 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
             </div>
             {errors.sku && (
               <p className="mt-2 text-sm text-red-600">{errors.sku.message}</p>
+            )}
+            {skuError && (
+              <p className="mt-2 text-sm text-red-600">{skuError}</p>
             )}
           </div>
         </div>
@@ -286,31 +469,30 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
 
           {/* Category */}
           <div>
-            <label htmlFor="category" className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
               🏷️ Kategori <span className="text-red-500">*</span>
             </label>
-            <select
-              {...register('category', {
-                required: 'Kategori wajib dipilih'
-              })}
-              className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-4 focus:ring-blue-100 transition-all duration-300 outline-none ${
-                errors.category ? 'border-red-300 focus:border-red-500' : 'border-gray-200 focus:border-blue-500'
-              }`}
-            >
-              {categoryOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.icon} {option.label}
-                </option>
-              ))}
-            </select>
-            {errors.category && (
-              <p className="mt-2 text-sm text-red-600">{errors.category.message}</p>
-            )}
+            <Select
+              options={categoryOptions}
+              value={selectedCategory}
+              onChange={handleCategorySelect}
+              onCreateOption={handleCreateCategory}
+              onInputChange={(value) => fetchCategories(value)}
+              placeholder="Pilih atau buat kategori baru..."
+              isSearchable={true}
+              isCreatable={true}
+              isLoading={isLoadingCategories}
+              error={errors.category?.message}
+            />
+            <input
+              {...register('category', { required: 'Kategori wajib dipilih' })}
+              type="hidden"
+            />
           </div>
         </div>
 
         {/* Price & Stock (for products) */}
-        {(watchType === 'product' || watchType === 'service') && !watchHasVariations && (
+        {!watchHasVariations && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Price */}
             <div>
@@ -376,137 +558,167 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
           />
         </div>
 
-        {/* Variations Toggle (only for products) */}
-        {watchType === 'product' && (
-          <div>
-            <div className="flex items-center justify-between">
-              <label className="text-sm font-semibold text-gray-700">
-                🔄 Variasi Produk
-              </label>
-              <label className="inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  {...register('hasVariations')}
-                  className="sr-only peer"
-                />
-                <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-100 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                <span className="ms-3 text-sm font-medium text-gray-700">
-                  {watchHasVariations ? 'Aktif' : 'Nonaktif'}
-                </span>
-              </label>
-            </div>
-            
-            {watchHasVariations && (
-              <div className="mt-4 p-4 border border-blue-200 rounded-xl bg-blue-50">
-                <div className="flex items-center justify-between mb-4">
-                  <h4 className="font-semibold text-blue-800">Daftar Variasi</h4>
-                  <div className="flex space-x-2">
-                    <button
-                      type="button"
-                      onClick={generateVariationSkus}
-                      className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded-lg font-medium transition-colors text-sm"
-                    >
-                      Generate SKU Variasi
-                    </button>
-                    <button
-                      type="button"
-                      onClick={addVariation}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg font-medium transition-colors text-sm"
-                    >
-                      + Tambah Variasi
-                    </button>
-                  </div>
+        {/* Variations Toggle */}
+        <div>
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-semibold text-gray-700">
+              🔄 Variasi {watchType === 'product' ? 'Produk' : 'Layanan'}
+            </label>
+            <label className="inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                {...register('hasVariations')}
+                className="sr-only peer"
+              />
+              <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-100 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              <span className="ms-3 text-sm font-medium text-gray-700">
+                {watchHasVariations ? 'Aktif' : 'Nonaktif'}
+              </span>
+            </label>
+          </div>
+          
+          {watchHasVariations && (
+            <div className="mt-4 p-4 border border-blue-200 rounded-xl bg-blue-50">
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="font-semibold text-blue-800">Daftar Variasi</h4>
+                <div className="flex space-x-2">
+                  <button
+                    type="button"
+                    onClick={generateVariationSkus}
+                    className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded-lg font-medium transition-colors text-sm"
+                  >
+                    Generate SKU Variasi
+                  </button>
+                  <button
+                    type="button"
+                    onClick={addVariation}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg font-medium transition-colors text-sm"
+                  >
+                    + Tambah Variasi
+                  </button>
                 </div>
-                
-                {fields.map((field, index) => (
-                  <div key={field.id} className="mb-4 p-4 bg-white rounded-lg border border-gray-200">
-                    <div className="flex items-center justify-between mb-3">
-                      <h5 className="font-medium text-gray-900">Variasi #{index + 1}</h5>
-                      {fields.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => remove(index)}
-                          className="text-red-500 hover:text-red-700 transition-colors"
-                        >
-                          ✕ Hapus
-                        </button>
+              </div>
+              
+              {fields.map((field, index) => (
+                <div key={field.id} className="mb-4 p-4 bg-white rounded-lg border border-gray-200">
+                  <div className="flex items-center justify-between mb-3">
+                    <h5 className="font-medium text-gray-900">Variasi #{index + 1}</h5>
+                    {fields.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => remove(index)}
+                        className="text-red-500 hover:text-red-700 transition-colors"
+                      >
+                        ✕ Hapus
+                      </button>
+                    )}
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Variation Name */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Nama Variasi <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        {...register(`variations.${index}.name` as const, {
+                          required: 'Nama variasi wajib diisi'
+                        })}
+                        type="text"
+                        placeholder="Contoh: Ukuran S, Warna Merah"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none"
+                      />
+                      {errors.variations?.[index]?.name && (
+                        <p className="mt-1 text-xs text-red-600">{errors.variations[index]?.name?.message}</p>
                       )}
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* Variation Name */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Nama Variasi <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          {...register(`variations.${index}.name` as const, {
-                            required: 'Nama variasi wajib diisi'
-                          })}
-                          type="text"
-                          placeholder="Contoh: Ukuran S, Warna Merah"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none"
-                        />
-                      </div>
-                      
-                      {/* Variation SKU */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          SKU Variasi <span className="text-red-500">*</span>
-                        </label>
+                    {/* Variation SKU */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        SKU Variasi <span className="text-red-500">*</span>
+                      </label>
+                      <div className="relative">
                         <input
                           {...register(`variations.${index}.sku` as const, {
-                            required: 'SKU variasi wajib diisi'
+                            required: 'SKU variasi wajib diisi',
+                            pattern: {
+                              value: /^[A-Z0-9\-]+$/,
+                              message: 'SKU hanya boleh berisi huruf besar, angka, dan tanda hubung'
+                            }
                           })}
                           type="text"
                           placeholder="PRD-001-V01"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none"
+                          className={`w-full px-3 py-2 pr-10 border rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none ${
+                            errors.variations?.[index]?.sku || variationSkuErrors[index] ? 'border-red-300' : 'border-gray-300'
+                          }`}
+                        />
+                        
+                        {/* Status indicator */}
+                        {watchVariations[index]?.sku && watchVariations[index].sku.length >= 4 && !variationSkuErrors[index] && (
+                          <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                            <span className="text-green-500 text-sm">✓</span>
+                          </div>
+                        )}
+                      </div>
+                      {errors.variations?.[index]?.sku && (
+                        <p className="mt-1 text-xs text-red-600">{errors.variations[index]?.sku?.message}</p>
+                      )}
+                      {variationSkuErrors[index] && (
+                        <p className="mt-1 text-xs text-red-600">{variationSkuErrors[index]}</p>
+                      )}
+                    </div>
+                    
+                    {/* Variation Price */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Harga <span className="text-red-500">*</span>
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">
+                          Rp
+                        </span>
+                        <input
+                          {...register(`variations.${index}.price` as const, {
+                            required: 'Harga variasi wajib diisi',
+                            min: { value: 0, message: 'Harga tidak boleh negatif' }
+                          })}
+                          type="number"
+                          placeholder="0"
+                          className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none"
                         />
                       </div>
-                      
-                      {/* Variation Price */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Harga <span className="text-red-500">*</span>
-                        </label>
-                        <div className="relative">
-                          <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">
-                            Rp
-                          </span>
-                          <input
-                            {...register(`variations.${index}.price` as const, {
-                              required: 'Harga variasi wajib diisi',
-                              min: { value: 0, message: 'Harga tidak boleh negatif' }
-                            })}
-                            type="number"
-                            placeholder="0"
-                            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none"
-                          />
-                        </div>
-                      </div>
-                      
-                      {/* Variation Stock */}
+                      {errors.variations?.[index]?.price && (
+                        <p className="mt-1 text-xs text-red-600">{errors.variations[index]?.price?.message}</p>
+                      )}
+                    </div>
+                    
+                    {/* Variation Stock (only for products) */}
+                    {watchType === 'product' && (
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Stok <span className="text-red-500">*</span>
                         </label>
                         <input
                           {...register(`variations.${index}.stock` as const, {
-                            required: 'Stok variasi wajib diisi',
+                            required: watchType === 'product' ? 'Stok variasi wajib diisi' : false,
                             min: { value: 0, message: 'Stok tidak boleh negatif' }
                           })}
                           type="number"
                           placeholder="0"
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none"
                         />
+                        {errors.variations?.[index]?.stock && (
+                          <p className="mt-1 text-xs text-red-600">{errors.variations[index]?.stock?.message}</p>
+                        )}
                       </div>
-                    </div>
+                    )}
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Status */}
         <div>
@@ -549,9 +761,9 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
               <h4 className="font-semibold text-blue-800 mb-1">Informasi Penting</h4>
               <ul className="text-sm text-blue-700 space-y-1">
                 <li>• SKU harus unik untuk setiap produk dan variasi</li>
-                <li>• Untuk layanan, stok dan variasi tidak relevan</li>
-                <li>• Variasi digunakan untuk produk dengan beberapa opsi (ukuran, warna, dll)</li>
-                <li>• Harga dan stok per variasi wajib diisi jika variasi aktif</li>
+                <li>• Untuk layanan, stok tidak relevan</li>
+                <li>• Variasi digunakan untuk produk/layanan dengan beberapa opsi (ukuran, warna, dll)</li>
+                <li>• Harga per variasi wajib diisi jika variasi aktif</li>
               </ul>
             </div>
           </div>
@@ -569,7 +781,7 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
           </button>
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isCheckingSku || Object.keys(variationSkuErrors).length > 0}
             className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg disabled:transform-none disabled:shadow-none flex items-center justify-center space-x-2"
           >
             {isSubmitting ? (

@@ -141,8 +141,8 @@ export default function ProductsTable({
         <div className="animate-pulse space-y-4">
           <div className="h-6 bg-gray-200 rounded w-1/4"></div>
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="grid grid-cols-6 gap-4">
-              {[1, 2, 3, 4, 5, 6].map((j) => (
+            <div key={i} className="grid grid-cols-4 gap-4">
+              {[1, 2, 3, 4].map((j) => (
                 <div key={j} className="h-4 bg-gray-200 rounded"></div>
               ))}
             </div>
@@ -165,8 +165,6 @@ export default function ProductsTable({
               {[
                 { key: 'name', label: 'Nama Item' },
                 { key: 'sku', label: 'SKU' },
-                { key: 'category', label: 'Kategori' },
-                { key: 'type', label: 'Jenis' },
                 { key: 'price', label: 'Harga' },
                 { key: 'stock', label: 'Stok' }
               ].map((column) => (
@@ -184,9 +182,6 @@ export default function ProductsTable({
                 </th>
               ))}
               <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
-              </th>
-              <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Aksi
               </th>
             </tr>
@@ -201,7 +196,10 @@ export default function ProductsTable({
                   <td className="px-6 py-4">
                     <div className="flex items-center">
                       <div>
-                        <div className="font-medium text-gray-900">{product.name}</div>
+                        <div className="font-medium text-gray-900 flex items-center space-x-2">
+                          <span>{getTypeIcon(product.type)}</span>
+                          <span>{product.name}</span>
+                        </div>
                         {product.hasVariations && (
                           <button
                             onClick={() => toggleExpandProduct(product.id)}
@@ -217,18 +215,6 @@ export default function ProductsTable({
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {product.sku}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-lg">{getCategoryIcon(product.category)}</span>
-                      <span className="text-sm text-gray-900">{getCategoryName(product.category)}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-lg">{getTypeIcon(product.type)}</span>
-                      <span className="text-sm text-gray-900">{getTypeText(product.type)}</span>
-                    </div>
-                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     {product.hasVariations 
                       ? `${formatCurrency(Math.min(...product.variations.map(v => v.price)))} - ${formatCurrency(Math.max(...product.variations.map(v => v.price)))}`
@@ -237,11 +223,6 @@ export default function ProductsTable({
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {getTotalStock(product)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(product.status)}`}>
-                      {getStatusText(product.status)}
-                    </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-2">
@@ -272,15 +253,12 @@ export default function ProductsTable({
                     <td className="px-6 py-3 text-sm text-gray-700">
                       {variation.sku}
                     </td>
-                    <td className="px-6 py-3"></td>
-                    <td className="px-6 py-3"></td>
                     <td className="px-6 py-3 text-sm font-medium text-gray-900">
                       {formatCurrency(variation.price)}
                     </td>
                     <td className="px-6 py-3 text-sm text-gray-900">
-                      {variation.stock === 0 ? '⚠️ Stok Habis' : variation.stock}
+                      {product.type === 'service' ? '-' : (variation.stock === 0 ? '⚠️ Stok Habis' : variation.stock)}
                     </td>
-                    <td className="px-6 py-3"></td>
                     <td className="px-6 py-3"></td>
                   </tr>
                 ))}
@@ -299,7 +277,10 @@ export default function ProductsTable({
                 <span className="bg-blue-100 text-blue-600 px-2 py-1 rounded-full text-xs font-medium">
                   #{startIndex + index + 1}
                 </span>
-                <div className="font-semibold text-gray-900">{product.name}</div>
+                <div className="font-semibold text-gray-900 flex items-center space-x-1">
+                  <span>{getTypeIcon(product.type)}</span>
+                  <span>{product.name}</span>
+                </div>
               </div>
               <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(product.status)}`}>
                 {getStatusText(product.status)}
@@ -310,20 +291,6 @@ export default function ProductsTable({
               <div>
                 <span className="text-gray-500">SKU:</span>
                 <div className="font-medium">{product.sku}</div>
-              </div>
-              <div>
-                <span className="text-gray-500">Kategori:</span>
-                <div className="font-medium flex items-center space-x-1">
-                  <span>{getCategoryIcon(product.category)}</span>
-                  <span>{getCategoryName(product.category)}</span>
-                </div>
-              </div>
-              <div>
-                <span className="text-gray-500">Jenis:</span>
-                <div className="font-medium flex items-center space-x-1">
-                  <span>{getTypeIcon(product.type)}</span>
-                  <span>{getTypeText(product.type)}</span>
-                </div>
               </div>
               <div>
                 <span className="text-gray-500">Harga:</span>
@@ -340,6 +307,13 @@ export default function ProductsTable({
                   <div className="font-medium">{getTotalStock(product)}</div>
                 </div>
               )}
+              <div>
+                <span className="text-gray-500">Kategori:</span>
+                <div className="font-medium flex items-center space-x-1">
+                  <span>{getCategoryIcon(product.category)}</span>
+                  <span>{getCategoryName(product.category)}</span>
+                </div>
+              </div>
             </div>
             
             {/* Variations (Mobile) */}
@@ -363,8 +337,8 @@ export default function ProductsTable({
                         </div>
                         <div className="flex justify-between text-sm mt-1">
                           <div className="text-gray-500">{variation.sku}</div>
-                          <div className={variation.stock === 0 ? 'text-red-500' : 'text-gray-700'}>
-                            {variation.stock === 0 ? '⚠️ Stok Habis' : `Stok: ${variation.stock}`}
+                          <div className={variation.stock === 0 && product.type !== 'service' ? 'text-red-500' : 'text-gray-700'}>
+                            {product.type === 'service' ? '-' : (variation.stock === 0 ? '⚠️ Stok Habis' : `Stok: ${variation.stock}`)}
                           </div>
                         </div>
                       </div>
