@@ -2,16 +2,15 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 
-interface Option {
+export interface SelectOption {
   value: string;
   label: string;
-  phone?: string;
 }
 
-interface SelectProps {
-  options: Option[];
-  value?: Option | null;
-  onChange: (option: Option | null) => void;
+interface SelectProps<T extends SelectOption> {
+  options: T[];
+  value?: T | null;
+  onChange: (option: T | null) => void;
   onCreateOption?: (inputValue: string) => void;
   placeholder?: string;
   isSearchable?: boolean;
@@ -22,7 +21,7 @@ interface SelectProps {
   error?: string;
 }
 
-export default function Select({
+export default function Select<T extends SelectOption>({
   options,
   value,
   onChange,
@@ -34,7 +33,7 @@ export default function Select({
   onInputChange,
   className = '',
   error
-}: SelectProps) {
+}: SelectProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
@@ -44,7 +43,7 @@ export default function Select({
   // Filter options based on input
   const filteredOptions = options.filter(option =>
     option.label.toLowerCase().includes(inputValue.toLowerCase()) ||
-    (option.phone && option.phone.includes(inputValue))
+    ('phone' in option && (option as any).phone?.includes(inputValue))
   );
 
   // Check if we can create a new option
@@ -52,7 +51,7 @@ export default function Select({
     !options.some(option => option.label.toLowerCase() === inputValue.toLowerCase());
 
   const allOptions = canCreate 
-    ? [...filteredOptions, { value: inputValue, label: `Create "${inputValue}"` }]
+    ? [...filteredOptions, { value: inputValue, label: `Create "${inputValue}"` } as T]
     : filteredOptions;
 
   // Handle click outside
@@ -105,7 +104,7 @@ export default function Select({
     }
   };
 
-  const handleOptionSelect = (option: Option) => {
+  const handleOptionSelect = (option: T) => {
     if (canCreate && option.label.startsWith('Create "')) {
       onCreateOption?.(inputValue);
       setInputValue('');
@@ -199,8 +198,8 @@ export default function Select({
                     option.label
                   )}
                 </div>
-                {option.phone && !option.label.startsWith('Create "') && (
-                  <div className="text-sm text-gray-500">{option.phone}</div>
+                {'phone' in option && !(option.label.startsWith('Create "')) && (
+                  <div className="text-sm text-gray-500">{(option as any).phone}</div>
                 )}
               </button>
             ))

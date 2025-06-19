@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import Modal from '@/components/ui/Modal';
-import Select from '@/components/ui/Select';
+import Select, { SelectOption } from '@/components/ui/Select';
 import { useDebounce } from '@/hooks/useDebounce';
 import { toast } from 'react-toastify';
 
@@ -19,11 +19,10 @@ interface EmployeeFormData {
   role: string;
   customRole?: string;
   address?: string;
+  status: 'active' | 'inactive';
 }
 
-interface RoleOption {
-  value: string;
-  label: string;
+interface RoleOption extends SelectOption {
   icon: string;
   description: string;
 }
@@ -398,7 +397,7 @@ export default function AddEmployeeModal({ isOpen, onClose }: AddEmployeeModalPr
           <label className="block text-sm font-semibold text-gray-700 mb-2">
             💼 Jabatan <span className="text-red-500">*</span>
           </label>
-          <Select
+          <Select<RoleOption>
             options={roleOptions}
             value={selectedRole}
             onChange={handleRoleSelect}
@@ -465,7 +464,7 @@ export default function AddEmployeeModal({ isOpen, onClose }: AddEmployeeModalPr
                 <li>• Nomor HP dan email akan dicek otomatis untuk duplikasi</li>
                 <li>• Jabatan dapat dipilih dari daftar atau dibuat baru</li>
                 <li>• Data pegawai dapat diubah setelah disimpan</li>
-                <li>• Status pegawai akan otomatis diset sebagai &ldquo;Aktif&rdquo;</li>
+                <li>• Status pegawai akan otomatis diset sebagai &quot;Aktif&quot;</li>
               </ul>
             </div>
           </div>

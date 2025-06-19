@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import Modal from '@/components/ui/Modal';
-import Select from '@/components/ui/Select';
+import Select, { SelectOption } from '@/components/ui/Select';
 
 interface AddOrderModalProps {
   isOpen: boolean;
@@ -20,9 +20,7 @@ interface OrderFormData {
   total: number;
 }
 
-interface Customer {
-  value: string;
-  label: string;
+interface CustomerOption extends SelectOption {
   phone: string;
 }
 
@@ -59,7 +57,7 @@ const paymentMethods = [
 ];
 
 // Mock customers data
-const mockCustomers: Customer[] = [
+const mockCustomers: CustomerOption[] = [
   { value: '1', label: 'Ahmad Santoso', phone: '081234567890' },
   { value: '2', label: 'Siti Nurhaliza', phone: '081234567891' },
   { value: '3', label: 'Budi Prasetyo', phone: '081234567892' },
@@ -68,8 +66,8 @@ const mockCustomers: Customer[] = [
 ];
 
 export default function AddOrderModal({ isOpen, onClose }: AddOrderModalProps) {
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
-  const [customers, setCustomers] = useState<Customer[]>(mockCustomers);
+  const [selectedCustomer, setSelectedCustomer] = useState<CustomerOption | null>(null);
+  const [customers, setCustomers] = useState<CustomerOption[]>(mockCustomers);
   const [isSearchingCustomers, setIsSearchingCustomers] = useState(false);
 
   const {
@@ -119,7 +117,7 @@ export default function AddOrderModal({ isOpen, onClose }: AddOrderModalProps) {
   };
 
   // Handle customer selection
-  const handleCustomerSelect = (customer: Customer | null) => {
+  const handleCustomerSelect = (customer: CustomerOption | null) => {
     setSelectedCustomer(customer);
     if (customer) {
       setValue('customerName', customer.label);
@@ -132,7 +130,7 @@ export default function AddOrderModal({ isOpen, onClose }: AddOrderModalProps) {
 
   // Handle creating new customer
   const handleCreateCustomer = (name: string) => {
-    const newCustomer: Customer = {
+    const newCustomer: CustomerOption = {
       value: `new_${Date.now()}`,
       label: name,
       phone: ''
@@ -195,7 +193,7 @@ export default function AddOrderModal({ isOpen, onClose }: AddOrderModalProps) {
           <label className="block text-sm font-semibold text-gray-700 mb-3">
             👤 Pelanggan
           </label>
-          <Select
+          <Select<CustomerOption>
             options={customers}
             value={selectedCustomer}
             onChange={handleCustomerSelect}

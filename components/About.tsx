@@ -28,21 +28,6 @@ export default function About() {
 
   const { about } = data;
 
-  // Split the description text to properly embed JSX
-  const renderDescription = (text: string) => {
-    const parts = text.split('5.000 pelanggan');
-    if (parts.length === 2) {
-      return (
-        <>
-          {parts[0]}
-          <span className="font-semibold text-blue-600">5.000 pelanggan</span>
-          {parts[1]}
-        </>
-      );
-    }
-    return text;
-  };
-
   return (
     <section id="about" className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -55,7 +40,7 @@ export default function About() {
               </h2>
               
               <p className="text-lg text-gray-600 leading-relaxed">
-                {renderDescription(about.description)}
+                {about.description.replace('5.000 pelanggan', '5.000 pelanggan')}
               </p>
               
               <div className="flex items-start space-x-3 p-4 bg-blue-50 rounded-lg">
