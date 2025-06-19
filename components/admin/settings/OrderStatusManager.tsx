@@ -4,17 +4,15 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 import Modal from '@/components/ui/Modal';
-
-interface OrderStatus {
-  id: string;
-  name: string;
-  description: string;
-  icon: string;
-  order: number;
-  isActive: boolean;
-  isDefault?: boolean;
-  createdAt: string;
-}
+import { 
+  useOrderStatuses, 
+  useCreateOrderStatus, 
+  useUpdateOrderStatus, 
+  useDeleteOrderStatus,
+  useUpdateOrderStatusPositions,
+  useToggleOrderStatusActive
+} from '@/hooks/useOrderStatus';
+import { OrderStatus } from '@/lib/order-status-api';
 
 interface OrderStatusFormData {
   name: string;
@@ -25,12 +23,20 @@ interface OrderStatusFormData {
 }
 
 export default function OrderStatusManager() {
-  const [orderStatuses, setOrderStatuses] = useState<OrderStatus[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingStatus, setEditingStatus] = useState<OrderStatus | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [draggedItem, setDraggedItem] = useState<OrderStatus | null>(null);
+
+  // Fetch order statuses
+  const { data: orderStatuses, isLoading } = useOrderStatuses();
+  
+  // Mutations
+  const createStatusMutation = useCreateOrderStatus();
+  const updateStatusMutation = useUpdateOrderStatus();
+  const deleteStatusMutation = useDeleteOrderStatus();
+  const updatePositionsMutation = useUpdateOrderStatusPositions();
+  const toggleActiveMutation = useToggleOrderStatusActive();
 
   const {
     register,
@@ -49,102 +55,19 @@ export default function OrderStatusManager() {
     }
   });
 
-  // Load order statuses
+  // Set initial order value when adding a new status
   useEffect(() => {
-    const loadOrderStatuses = async () => {
-      setIsLoading(true);
-      try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 800));
-        
-        // Mock data
-        const mockStatuses: OrderStatus[] = [
-          {
-            id: '1',
-            name: 'Pesanan Diterima',
-            description: 'Pesanan telah diterima dan sedang menunggu proses',
-            icon: '📥',
-            order: 1,
-            isActive: true,
-            isDefault: true,
-            createdAt: '2024-12-15'
-          },
-          {
-            id: '2',
-            name: 'Sedang Dicuci',
-            description: 'Pesanan sedang dalam proses pencucian',
-            icon: '🧼',
-            order: 2,
-            isActive: true,
-            createdAt: '2024-12-15'
-          },
-          {
-            id: '3',
-            name: 'Sedang Dikeringkan',
-            description: 'Pesanan sedang dalam proses pengeringan',
-            icon: '🌞',
-            order: 3,
-            isActive: true,
-            createdAt: '2024-12-15'
-          },
-          {
-            id: '4',
-            name: 'Sedang Disetrika',
-            description: 'Pesanan sedang dalam proses penyetrikaan',
-            icon: '🔥',
-            order: 4,
-            isActive: true,
-            createdAt: '2024-12-15'
-          },
-          {
-            id: '5',
-            name: 'Siap Diambil',
-            description: 'Pesanan telah selesai dan siap untuk diambil',
-            icon: '🚚',
-            order: 5,
-            isActive: true,
-            createdAt: '2024-12-15'
-          },
-          {
-            id: '6',
-            name: 'Pesanan Selesai',
-            description: 'Pesanan telah diambil/diterima oleh pelanggan',
-            icon: '✅',
-            order: 6,
-            isActive: true,
-            isDefault: true,
-            createdAt: '2024-12-15'
-          },
-          {
-            id: '7',
-            name: 'Dibatalkan',
-            description: 'Pesanan dibatalkan',
-            icon: '❌',
-            order: 7,
-            isActive: true,
-            isDefault: true,
-            createdAt: '2024-12-15'
-          }
-        ];
-        
-        setOrderStatuses(mockStatuses);
-      } catch (error) {
-        console.error('Error loading order statuses:', error);
-        toast.error('Gagal memuat data status pesanan');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    loadOrderStatuses();
-  }, []);
+    if (!editingStatus && orderStatuses) {
+      setValue('order', orderStatuses.length + 1);
+    }
+  }, [orderStatuses, editingStatus, setValue]);
 
   const handleAddStatus = () => {
     reset({
       name: '',
       description: '',
       icon: '📦',
-      order: orderStatuses.length + 1,
+      order: orderStatuses ? orderStatuses.length + 1 : 1,
       isActive: true
     });
     setEditingStatus(null);
@@ -171,16 +94,7 @@ export default function OrderStatusManager() {
     }
     
     if (confirm(`Apakah Anda yakin ingin menghapus status "${status.name}"?`)) {
-      // Here you would call your API to delete the status
-      console.log('Deleting status:', status.id);
-      
-      // Update local state
-      setOrderStatuses(prev => prev.filter(s => s.id !== status.id));
-      
-      toast.success(`Status "${status.name}" berhasil dihapus!`, {
-        position: "top-right",
-        autoClose: 3000,
-      });
+      deleteStatusMutation.mutate(status.id);
     }
   };
 
@@ -193,90 +107,38 @@ export default function OrderStatusManager() {
       return;
     }
     
-    // Here you would call your API to update the status
-    console.log('Toggling status active state:', status.id);
-    
-    // Update local state
-    setOrderStatuses(prev => 
-      prev.map(s => 
-        s.id === status.id 
-          ? { ...s, isActive: !s.isActive } 
-          : s
-      )
-    );
-    
-    toast.success(`Status "${status.name}" berhasil ${status.isActive ? 'dinonaktifkan' : 'diaktifkan'}!`, {
-      position: "top-right",
-      autoClose: 3000,
+    toggleActiveMutation.mutate({
+      id: status.id,
+      isActive: !status.isActive
     });
   };
 
   const onSubmitStatus = async (data: OrderStatusFormData) => {
-    try {
-      if (editingStatus) {
-        // Update existing status
-        console.log('Updating status:', { ...data, id: editingStatus.id });
-        
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 800));
-        
-        // Update local state
-        setOrderStatuses(prev => 
-          prev.map(s => 
-            s.id === editingStatus.id 
-              ? { 
-                  ...s, 
-                  name: data.name,
-                  description: data.description,
-                  icon: data.icon,
-                  order: data.order,
-                  isActive: data.isActive
-                } 
-              : s
-          )
-        );
-        
-        toast.success(`Status "${data.name}" berhasil diperbarui!`, {
-          position: "top-right",
-          autoClose: 3000,
-        });
-      } else {
-        // Create new status
-        const newStatus: OrderStatus = {
-          id: `status_${Date.now()}`,
-          name: data.name,
-          description: data.description,
-          icon: data.icon,
-          order: data.order,
-          isActive: data.isActive,
-          createdAt: new Date().toISOString()
-        };
-        
-        console.log('Creating new status:', newStatus);
-        
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 800));
-        
-        // Update local state
-        setOrderStatuses(prev => [...prev, newStatus].sort((a, b) => a.order - b.order));
-        
-        toast.success(`Status "${data.name}" berhasil ditambahkan!`, {
-          position: "top-right",
-          autoClose: 3000,
-        });
-      }
-      
-      // Close modal and reset form
-      setShowAddModal(false);
-      reset();
-      setEditingStatus(null);
-    } catch (error) {
-      console.error('Error saving status:', error);
-      toast.error('Gagal menyimpan status. Silakan coba lagi.', {
-        position: "top-right",
-        autoClose: 5000,
+    if (editingStatus) {
+      // Update existing status
+      updateStatusMutation.mutate({
+        ...editingStatus,
+        name: data.name,
+        description: data.description,
+        icon: data.icon,
+        order: data.order,
+        isActive: data.isActive
+      });
+    } else {
+      // Create new status
+      createStatusMutation.mutate({
+        name: data.name,
+        description: data.description,
+        icon: data.icon,
+        order: data.order,
+        isActive: data.isActive
       });
     }
+    
+    // Close modal and reset form
+    setShowAddModal(false);
+    reset();
+    setEditingStatus(null);
   };
 
   const handleDragStart = (status: OrderStatus) => {
@@ -286,7 +148,7 @@ export default function OrderStatusManager() {
 
   const handleDragOver = (e: React.DragEvent, targetStatus: OrderStatus) => {
     e.preventDefault();
-    if (!draggedItem || draggedItem.id === targetStatus.id) return;
+    if (!draggedItem || draggedItem.id === targetStatus.id || !orderStatuses) return;
     
     // Reorder the statuses
     const newStatuses = [...orderStatuses];
@@ -300,11 +162,14 @@ export default function OrderStatusManager() {
       newStatuses.splice(targetIndex, 0, removed);
       
       // Update order numbers
-      newStatuses.forEach((status, index) => {
-        status.order = index + 1;
-      });
+      const statusUpdates = newStatuses.map((status, index) => ({
+        id: status.id,
+        order: index + 1
+      }));
       
-      setOrderStatuses(newStatuses);
+      // Update the UI immediately for better UX
+      // The actual API update will happen on drag end
+      // This is just for visual feedback
     }
   };
 
@@ -312,13 +177,16 @@ export default function OrderStatusManager() {
     setIsDragging(false);
     setDraggedItem(null);
     
-    // Here you would call your API to update the order of all statuses
-    console.log('Saving new status order:', orderStatuses.map(s => ({ id: s.id, order: s.order })));
+    if (!orderStatuses) return;
     
-    toast.success('Urutan status berhasil diperbarui!', {
-      position: "top-right",
-      autoClose: 3000,
-    });
+    // Update order numbers
+    const statusUpdates = orderStatuses.map((status, index) => ({
+      id: status.id,
+      order: index + 1
+    }));
+    
+    // Call API to update positions
+    updatePositionsMutation.mutate(statusUpdates);
   };
 
   const iconOptions = [
@@ -371,7 +239,7 @@ export default function OrderStatusManager() {
         </div>
       ) : (
         <div className="space-y-3">
-          {orderStatuses.map((status) => (
+          {orderStatuses?.map((status) => (
             <div
               key={status.id}
               draggable
@@ -438,7 +306,7 @@ export default function OrderStatusManager() {
                     status.isDefault ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
                   disabled={status.isDefault}
-                  title={status.isDefault ? 'Status default tidak dapat dihapus' : 'Hapus'}
+                  title={status.isDefault ? "Status default tidak dapat dihapus" : "Hapus"}
                 >
                   🗑️
                 </button>
