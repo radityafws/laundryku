@@ -17,17 +17,17 @@ export default function SettingsPage() {
       description: 'Konfigurasi WhatsApp'
     },
     {
+      id: 'orderStatus',
+      label: 'Status Pesanan',
+      icon: '📦',
+      description: 'Konfigurasi Status'
+    },
+    {
       id: 'backup',
       label: 'Backup & Restore',
       icon: '💾',
       description: 'Manajemen Data'
     },
-    {
-      id: 'orderStatus',
-      label: 'Status Pesanan',
-      icon: '📦',
-      description: 'Konfigurasi Status'
-    }
   ];
 
   return (
