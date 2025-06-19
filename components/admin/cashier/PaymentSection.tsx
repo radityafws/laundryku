@@ -49,12 +49,42 @@ export default function PaymentSection({
   createOrder
 }: PaymentSectionProps) {
   const { data: orderStatuses, isLoading: isLoadingStatuses } = useOrderStatuses();
+  
+  // Calculate cart totals
+  const subtotal = cartItems.reduce((sum, item) => sum + item.subtotal, 0);
+  
+  const discountAmount = appliedPromos.reduce((sum, promo) => {
+    if (promo.isPercentage) {
+      return sum + (subtotal * promo.discount / 100);
+    } else {
+      return sum + promo.discount;
+    }
+  }, 0);
+  
+  const total = Math.max(0, subtotal - discountAmount);
+  
+  // Format currency
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0
+    }).format(amount);
+  };
 
   return (
     <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-4 sm:p-6">
       <h3 className="text-lg font-bold text-gray-900 mb-4">💳 Informasi Pembayaran</h3>
       
       <div className="space-y-4">
+        {/* Total Summary (Mobile Only) */}
+        <div className="xl:hidden bg-blue-50 p-4 rounded-xl border border-blue-200 mb-4">
+          <div className="flex justify-between items-center">
+            <span className="font-medium text-blue-800">Total Pembayaran:</span>
+            <span className="text-xl font-bold text-blue-700">{formatCurrency(total)}</span>
+          </div>
+        </div>
+        
         {/* Payment Method */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">

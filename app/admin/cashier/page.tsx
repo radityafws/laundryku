@@ -165,6 +165,19 @@ export default function CashierPage() {
     }, 1000);
   };
 
+  // Calculate cart totals for mobile display
+  const subtotal = cartItems.reduce((sum, item) => sum + item.subtotal, 0);
+  
+  const discountAmount = appliedPromos.reduce((sum, promo) => {
+    if (promo.isPercentage) {
+      return sum + (subtotal * promo.discount / 100);
+    } else {
+      return sum + promo.discount;
+    }
+  }, 0);
+  
+  const total = Math.max(0, subtotal - discountAmount);
+
   return (
     <DashboardLayout title="Kasir" subtitle="Buat pesanan baru dan proses pembayaran">
       <div className="space-y-6">
@@ -187,9 +200,9 @@ export default function CashierPage() {
         </div>
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
           {/* Left Column - Customer & Products */}
-          <div className="xl:col-span-2 space-y-6">
+          <div className="xl:col-span-8 space-y-6">
             {/* Customer Selection */}
             <CustomerSection 
               selectedCustomer={selectedCustomer}
@@ -203,7 +216,7 @@ export default function CashierPage() {
           </div>
           
           {/* Right Column - Cart & Payment */}
-          <div className="space-y-6">
+          <div className="xl:col-span-4 space-y-6">
             {/* Cart */}
             <CartSection 
               cartItems={cartItems}

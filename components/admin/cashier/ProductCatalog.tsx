@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useProducts } from '@/hooks/useProducts';
 import { toast } from 'react-toastify';
+import Modal from '@/components/ui/Modal';
 
 interface CartItem {
   id: string;
@@ -25,6 +26,8 @@ export default function ProductCatalog({ addToCart }: ProductCatalogProps) {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [showVariationsModal, setShowVariationsModal] = useState(false);
   
   // Fetch products
   const { data: products, isLoading: isLoadingProducts } = useProducts();
@@ -74,6 +77,19 @@ export default function ProductCatalog({ addToCart }: ProductCatalogProps) {
       case 'packaging': return '📦';
       case 'other': return '🔖';
       default: return '🏷️';
+    }
+  };
+
+  // Open variations modal
+  const openVariationsModal = (product: any) => {
+    setSelectedProduct(product);
+    setShowVariationsModal(true);
+  };
+
+  // Add product with variation from modal
+  const addVariationFromModal = (variation: any) => {
+    if (selectedProduct) {
+      addToCart(selectedProduct, variation);
     }
   };
 
@@ -175,9 +191,9 @@ export default function ProductCatalog({ addToCart }: ProductCatalogProps) {
         </div>
       ) : displayMode === 'grid' ? (
         // Grid View
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-h-[500px] overflow-y-auto p-1">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 max-h-[500px] overflow-y-auto p-1">
           {filteredProducts.map((product) => (
-            <div key={product.id} className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+            <div key={product.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
               {/* Product Header */}
               <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-3 border-b border-gray-200">
                 <div className="flex items-center justify-between">
@@ -189,7 +205,6 @@ export default function ProductCatalog({ addToCart }: ProductCatalogProps) {
                   </div>
                   <span className="text-xs font-medium px-2 py-1 bg-white rounded-full border border-gray-200 flex items-center space-x-1">
                     <span>{getCategoryIcon(product.category)}</span>
-                    <span className="hidden sm:inline">{getCategoryName(product.category)}</span>
                   </span>
                 </div>
               </div>
@@ -202,7 +217,7 @@ export default function ProductCatalog({ addToCart }: ProductCatalogProps) {
                 <div className="flex justify-between items-center">
                   <div className="text-sm font-semibold text-blue-600">
                     {product.hasVariations 
-                      ? `${formatCurrency(Math.min(...product.variations.map(v => v.price)))} - ${formatCurrency(Math.max(...product.variations.map(v => v.price)))}`
+                      ? `${formatCurrency(Math.min(...product.variations.map(v => v.price)))} +`
                       : formatCurrency(product.price)
                     }
                   </div>
@@ -216,33 +231,12 @@ export default function ProductCatalog({ addToCart }: ProductCatalogProps) {
                 
                 {/* Add to Cart Button */}
                 {product.hasVariations ? (
-                  <div className="space-y-2 pt-2 border-t border-gray-200">
-                    <p className="text-xs text-gray-500">Pilih variasi:</p>
-                    <div className="space-y-1 max-h-24 overflow-y-auto">
-                      {product.variations.map((variation) => (
-                        <button
-                          key={variation.id}
-                          onClick={() => addToCart(product, variation)}
-                          disabled={product.type === 'product' && variation.stock === 0}
-                          className={`w-full text-left text-xs p-2 rounded-lg border ${
-                            product.type === 'product' && variation.stock === 0
-                              ? 'border-red-200 bg-red-50 text-red-700 cursor-not-allowed'
-                              : 'border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100'
-                          }`}
-                        >
-                          <div className="flex justify-between">
-                            <span>{variation.name}</span>
-                            <span>{formatCurrency(variation.price)}</span>
-                          </div>
-                          {product.type === 'product' && (
-                            <div className="text-xs mt-1">
-                              {variation.stock > 0 ? `Stok: ${variation.stock}` : 'Stok Habis'}
-                            </div>
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                  <button
+                    onClick={() => openVariationsModal(product)}
+                    className="w-full mt-2 py-2 rounded-lg font-medium text-sm bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    Pilih Variasi
+                  </button>
                 ) : (
                   <button
                     onClick={() => addToCart(product)}
@@ -264,7 +258,7 @@ export default function ProductCatalog({ addToCart }: ProductCatalogProps) {
         // List View
         <div className="space-y-3 max-h-[500px] overflow-y-auto p-1">
           {filteredProducts.map((product) => (
-            <div key={product.id} className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+            <div key={product.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
               <div className="flex flex-col sm:flex-row">
                 {/* Product Info */}
                 <div className="p-4 flex-1">
@@ -308,33 +302,12 @@ export default function ProductCatalog({ addToCart }: ProductCatalogProps) {
                 {/* Add to Cart */}
                 <div className="p-4 bg-gray-100 border-t sm:border-t-0 sm:border-l border-gray-200 flex flex-col justify-center">
                   {product.hasVariations ? (
-                    <div className="space-y-2">
-                      <p className="text-xs text-gray-500">Pilih variasi:</p>
-                      <div className="space-y-1 max-h-24 overflow-y-auto">
-                        {product.variations.map((variation) => (
-                          <button
-                            key={variation.id}
-                            onClick={() => addToCart(product, variation)}
-                            disabled={product.type === 'product' && variation.stock === 0}
-                            className={`w-full text-left text-xs p-2 rounded-lg border ${
-                              product.type === 'product' && variation.stock === 0
-                                ? 'border-red-200 bg-red-50 text-red-700 cursor-not-allowed'
-                                : 'border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100'
-                            }`}
-                          >
-                            <div className="flex justify-between">
-                              <span>{variation.name}</span>
-                              <span>{formatCurrency(variation.price)}</span>
-                            </div>
-                            {product.type === 'product' && (
-                              <div className="text-xs mt-1">
-                                {variation.stock > 0 ? `Stok: ${variation.stock}` : 'Stok Habis'}
-                              </div>
-                            )}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
+                    <button
+                      onClick={() => openVariationsModal(product)}
+                      className="py-2 px-4 rounded-lg font-medium text-sm bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      Pilih Variasi
+                    </button>
                   ) : (
                     <button
                       onClick={() => addToCart(product)}
@@ -354,6 +327,71 @@ export default function ProductCatalog({ addToCart }: ProductCatalogProps) {
           ))}
         </div>
       )}
+
+      {/* Variations Modal */}
+      <Modal
+        isOpen={showVariationsModal}
+        onClose={() => setShowVariationsModal(false)}
+        size="md"
+      >
+        <div className="p-6 border-b border-gray-200">
+          <h3 className="text-xl font-bold text-gray-900">Pilih Variasi</h3>
+          <p className="text-gray-600">{selectedProduct?.name}</p>
+        </div>
+        
+        <div className="p-6">
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2 mb-4">
+              <span className="text-lg">{selectedProduct?.type === 'service' ? '🧼' : '🛍️'}</span>
+              <span className="text-sm font-medium px-2 py-1 bg-gray-100 rounded-full">
+                {selectedProduct?.type === 'service' ? 'Layanan' : 'Produk'}
+              </span>
+              <span className="text-sm font-medium px-2 py-1 bg-gray-100 rounded-full flex items-center space-x-1">
+                <span>{getCategoryIcon(selectedProduct?.category)}</span>
+                <span>{getCategoryName(selectedProduct?.category)}</span>
+              </span>
+            </div>
+            
+            <div className="space-y-3">
+              {selectedProduct?.variations.map((variation: any) => (
+                <button
+                  key={variation.id}
+                  onClick={() => {
+                    addVariationFromModal(variation);
+                    setShowVariationsModal(false);
+                  }}
+                  disabled={selectedProduct?.type === 'product' && variation.stock === 0}
+                  className={`w-full flex justify-between items-center p-4 rounded-xl border-2 transition-all duration-300 ${
+                    selectedProduct?.type === 'product' && variation.stock === 0
+                      ? 'border-red-200 bg-red-50 text-red-700 cursor-not-allowed'
+                      : 'border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 hover:border-blue-300'
+                  }`}
+                >
+                  <div className="text-left">
+                    <div className="font-medium">{variation.name}</div>
+                    <div className="text-sm">{variation.sku}</div>
+                    {selectedProduct?.type === 'product' && (
+                      <div className={`text-sm ${variation.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {variation.stock > 0 ? `Stok: ${variation.stock}` : 'Stok Habis'}
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-lg font-bold">{formatCurrency(variation.price)}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          <div className="mt-6 flex justify-end">
+            <button
+              onClick={() => setShowVariationsModal(false)}
+              className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all duration-300"
+            >
+              Batal
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
