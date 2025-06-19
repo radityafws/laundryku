@@ -108,8 +108,8 @@ export default function OrderStatusManager() {
           },
           {
             id: '6',
-            name: 'Sudah Diambil',
-            description: 'Pesanan telah diambil oleh pelanggan',
+            name: 'Pesanan Selesai',
+            description: 'Pesanan telah diambil/diterima oleh pelanggan',
             icon: '🚚',
             order: 6,
             isActive: true,
