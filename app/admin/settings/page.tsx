@@ -11,16 +11,16 @@ export default function SettingsPage() {
 
   const tabs = [
     {
-      id: 'notifications',
-      label: 'Notifikasi',
-      icon: '📱',
-      description: 'Konfigurasi WhatsApp'
-    },
-    {
       id: 'orderStatus',
       label: 'Status Pesanan',
       icon: '📦',
       description: 'Konfigurasi Status'
+    },
+    {
+      id: 'notifications',
+      label: 'Notifikasi',
+      icon: '📱',
+      description: 'Konfigurasi WhatsApp'
     },
     {
       id: 'backup',
