@@ -318,7 +318,7 @@ export default function OrdersPage() {
                 <span className="text-blue-600">Filter aktif:</span>
                 {searchTerm && (
                   <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs">
-                    Pencarian: "{searchTerm}"
+                    Pencarian: &quot;{searchTerm}&quot;
                   </span>
                 )}
                 {statusFilter !== 'all' && (

@@ -115,7 +115,7 @@ export default function CustomersPage() {
                   Menampilkan {filteredCustomers.length} dari {customers?.length || 0} pelanggan
                   {debouncedSearchTerm && (
                     <span className="ml-2 bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs">
-                      "{debouncedSearchTerm}"
+                      &quot;{debouncedSearchTerm}&quot;
                     </span>
                   )}
                 </span>
